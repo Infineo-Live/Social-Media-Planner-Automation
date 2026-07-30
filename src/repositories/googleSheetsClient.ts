@@ -36,7 +36,7 @@ export class GoogleSheetsClient {
     try {
       const response = await fetch(this.appsScriptUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'append', sheet: sheetName, row }),
       });
       return response.ok;
@@ -45,6 +45,7 @@ export class GoogleSheetsClient {
       return false;
     }
   }
+
   async updateSheetRow(sheetName: string, idColumnIndex: number, rowId: string | number, row: any[]): Promise<boolean> {
     if (appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
       logger.debug(`[GoogleSheetsClient] Mock update row in ${sheetName}`, { rowId, row });
@@ -54,7 +55,7 @@ export class GoogleSheetsClient {
     try {
       const response = await fetch(this.appsScriptUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'update', sheet: sheetName, idColumnIndex, rowId, row }),
       });
       return response.ok;

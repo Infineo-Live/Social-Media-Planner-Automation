@@ -2,16 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/authContext';
 import { dataRepository } from '../repositories/dataRepository';
 import { User, UserRole } from '../types/user';
-import { Users, Plus, Shield, UserCheck, UserX } from 'lucide-react';
+import { Users, Plus, Edit3, UserCheck, UserX } from 'lucide-react';
 
 export const UsersManagement: React.FC = () => {
   const { currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
+  // Add Form State
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<UserRole>('Employee');
   const [error, setError] = useState<string | null>(null);
+
+  // Edit Form State
+  const [editFullName, setEditFullName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editRole, setEditRole] = useState<UserRole>('Employee');
+  const [editActive, setEditActive] = useState<boolean>(true);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const loadUsers = async () => {
     const list = await dataRepository.getUsers();
@@ -40,6 +50,33 @@ export const UsersManagement: React.FC = () => {
       await loadUsers();
     } catch (err: any) {
       setError(err.message || 'Failed to add user.');
+    }
+  };
+
+  const handleOpenEditModal = (user: User) => {
+    setEditingUser(user);
+    setEditFullName(user.fullName);
+    setEditEmail(user.email);
+    setEditRole(user.role);
+    setEditActive(user.active);
+    setEditError(null);
+  };
+
+  const handleSaveEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    setEditError(null);
+    try {
+      await dataRepository.updateUser(editingUser.userId, {
+        fullName: editFullName.trim(),
+        email: editEmail.trim(),
+        role: editRole,
+        active: editActive,
+      });
+      setEditingUser(null);
+      await loadUsers();
+    } catch (err: any) {
+      setEditError(err.message || 'Failed to update user.');
     }
   };
 
@@ -79,6 +116,7 @@ export const UsersManagement: React.FC = () => {
         </button>
       </div>
 
+      {/* Add User Modal */}
       {showAddModal && (
         <div
           style={{
@@ -146,15 +184,110 @@ export const UsersManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-secondary)' }}
+                  style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-secondary)', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600 }}
+                  style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
                 >
                   Save User
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {editingUser && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 200,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '10px',
+              padding: '1.75rem',
+              width: '90%',
+              maxWidth: '440px',
+            }}
+          >
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '1rem' }}>
+              Edit User #{editingUser.userId}
+            </h3>
+            {editError && (
+              <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '0.5rem 0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                {editError}
+              </div>
+            )}
+            <form onSubmit={handleSaveEditUser} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editFullName}
+                  onChange={(e) => setEditFullName(e.target.value)}
+                  style={{ width: '100%', padding: '0.6rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Google Email</label>
+                <input
+                  type="email"
+                  required
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  style={{ width: '100%', padding: '0.6rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Role</label>
+                <select
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value as UserRole)}
+                  style={{ width: '100%', padding: '0.6rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                >
+                  <option value="Employee">Employee</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Account Status</label>
+                <select
+                  value={editActive ? 'active' : 'inactive'}
+                  onChange={(e) => setEditActive(e.target.value === 'active')}
+                  style={{ width: '100%', padding: '0.6rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingUser(null)}
+                  style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Update User
                 </button>
               </div>
             </form>
@@ -193,24 +326,44 @@ export const UsersManagement: React.FC = () => {
                     </span>
                   </td>
                   <td style={{ padding: '0.85rem 1rem' }}>
-                    <button
-                      onClick={() => handleToggleActive(u)}
-                      style={{
-                        padding: '0.35rem 0.75rem',
-                        backgroundColor: 'var(--bg-main)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '4px',
-                        color: u.active ? 'var(--danger)' : 'var(--success)',
-                        fontSize: '0.8rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                      }}
-                    >
-                      {u.active ? <UserX size={14} /> : <UserCheck size={14} />}
-                      {u.active ? 'Deactivate' : 'Activate'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button
+                        onClick={() => handleOpenEditModal(u)}
+                        style={{
+                          padding: '0.35rem 0.75rem',
+                          backgroundColor: 'var(--bg-main)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.8rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                        }}
+                      >
+                        <Edit3 size={14} />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleActive(u)}
+                        style={{
+                          padding: '0.35rem 0.75rem',
+                          backgroundColor: 'var(--bg-main)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          color: u.active ? 'var(--danger)' : 'var(--success)',
+                          fontSize: '0.8rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                        }}
+                      >
+                        {u.active ? <UserX size={14} /> : <UserCheck size={14} />}
+                        {u.active ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
