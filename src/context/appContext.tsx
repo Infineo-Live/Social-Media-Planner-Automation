@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ContentItem, Series, SubSeries } from '../types/content';
 import { AppNotification } from '../types/notification';
-import { memoryRepository } from '../repositories/memoryRepository';
+import { dataRepository } from '../repositories/dataRepository';
 import { useAuth } from '../auth/authContext';
 import { logger } from '../services/logger';
 
@@ -28,16 +28,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       setIsLoading(true);
       const [items, sList, subList] = await Promise.all([
-        memoryRepository.getContentItems(),
-        memoryRepository.getSeries(),
-        memoryRepository.getSubSeries(),
+        dataRepository.getContentItems(),
+        dataRepository.getSeries(),
+        dataRepository.getSubSeries(),
       ]);
       setContentItems(items);
       setSeriesList(sList);
       setSubSeriesList(subList);
 
       if (currentUser) {
-        const notifs = await memoryRepository.getNotificationsForUser(currentUser.userId);
+        const notifs = await dataRepository.getNotificationsForUser(currentUser.userId);
         setNotifications(notifs);
       }
     } catch (err) {

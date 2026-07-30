@@ -13,6 +13,8 @@ import { AppNotification } from '../types/notification';
 import { AppConfig } from '../config/appConfig';
 import { ValidationError } from '../services/errorFramework';
 import { isValidEmail, isNonEmptyString } from '../utils/validationUtils';
+import { googleSheetsClient } from './googleSheetsClient';
+import { GoogleSheetsMapper } from './googleSheetsMapper';
 
 export class DataRepository
   implements
@@ -24,15 +26,21 @@ export class DataRepository
 {
   // User Operations
   async getUsers(): Promise<User[]> {
+    const rows = await googleSheetsClient.fetchSheetData('Users');
+    if (rows) {
+      return rows.map(r => GoogleSheetsMapper.rowToUser(r));
+    }
     return memoryRepository.getUsers();
   }
 
   async getUserById(userId: number): Promise<User | undefined> {
-    return memoryRepository.getUserById(userId);
+    const users = await this.getUsers();
+    return users.find(u => u.userId === userId);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return memoryRepository.getUserByEmail(email);
+    const users = await this.getUsers();
+    return users.find(u => u.email === email);
   }
 
   async createUser(user: Omit<User, 'userId' | 'createdAt' | 'updatedAt'>): Promise<User> {
@@ -48,23 +56,36 @@ export class DataRepository
       throw new ValidationError(`User with email '${user.email}' already exists.`);
     }
 
-    return memoryRepository.createUser(user);
+    const createdUser = await memoryRepository.createUser(user);
+    await googleSheetsClient.appendSheetRow('Users', GoogleSheetsMapper.userToRow(createdUser));
+    return createdUser;
   }
 
   async updateUser(userId: number, updates: Partial<User>): Promise<User> {
     if (updates.email && !isValidEmail(updates.email)) {
       throw new ValidationError('Invalid email address provided.');
     }
-    return memoryRepository.updateUser(userId, updates);
+    const updated = await memoryRepository.updateUser(userId, updates);
+    await googleSheetsClient.updateSheetRow('Users', 0, userId, GoogleSheetsMapper.userToRow(updated));
+    return updated;
   }
 
   // Content Operations
   async getContentItems(): Promise<ContentItem[]> {
+    const rows = await googleSheetsClient.fetchSheetData('Content');
+    if (rows) {
+      const series = await this.getSeries();
+      const subSeries = await this.getSubSeries();
+      const seriesIdMap = (name: string) => series.find(s => s.name === name)?.seriesId || 0;
+      const subSeriesIdMap = (name: string) => subSeries.find(s => s.name === name)?.subSeriesId;
+      return rows.map(r => GoogleSheetsMapper.rowToContent(r, seriesIdMap, subSeriesIdMap));
+    }
     return memoryRepository.getContentItems();
   }
 
   async getContentItemById(contentId: number): Promise<ContentItem | undefined> {
-    return memoryRepository.getContentItemById(contentId);
+    const items = await this.getContentItems();
+    return items.find(i => i.contentId === contentId);
   }
 
   async createContentItem(
@@ -77,11 +98,17 @@ export class DataRepository
       throw new ValidationError('Real Life Problem description is required.');
     }
 
-    return memoryRepository.createContentItem(item);
+    const created = await memoryRepository.createContentItem(item);
+    const series = await this.getSeries();
+    const subSeries = await this.getSubSeries();
+    const seriesName = series.find(s => s.seriesId === created.seriesId)?.name || '';
+    const subSeriesName = subSeries.find(s => s.subSeriesId === created.subSeriesId)?.name;
+    
+    await googleSheetsClient.appendSheetRow('Content', GoogleSheetsMapper.contentToRow(created, seriesName, subSeriesName));
+    return created;
   }
 
   async updateContentItem(contentId: number, updates: Partial<ContentItem>): Promise<ContentItem> {
-    // Validate episode number uniqueness per series if updating episode number
     if (updates.episodeNumber !== undefined && updates.episodeNumber !== null) {
       const existingItem = await this.getContentItemById(contentId);
       const targetSeriesId = updates.seriesId || existingItem?.seriesId;
@@ -101,21 +128,35 @@ export class DataRepository
       }
     }
 
-    return memoryRepository.updateContentItem(contentId, updates);
+    const updated = await memoryRepository.updateContentItem(contentId, updates);
+    const series = await this.getSeries();
+    const subSeries = await this.getSubSeries();
+    const seriesName = series.find(s => s.seriesId === updated.seriesId)?.name || '';
+    const subSeriesName = subSeries.find(s => s.subSeriesId === updated.subSeriesId)?.name;
+
+    await googleSheetsClient.updateSheetRow('Content', 0, contentId, GoogleSheetsMapper.contentToRow(updated, seriesName, subSeriesName));
+    return updated;
   }
 
   // Activity Log Operations
   async getActivityLogs(contentId?: number): Promise<ActivityLogItem[]> {
+    const rows = await googleSheetsClient.fetchSheetData('Activity Log');
+    if (rows) {
+      const logs = rows.map(r => GoogleSheetsMapper.rowToActivity(r));
+      return contentId ? logs.filter(l => l.contentId === contentId) : logs;
+    }
     return memoryRepository.getActivityLogs(contentId);
   }
 
   async logActivity(
     log: Omit<ActivityLogItem, 'activityId' | 'timestamp'>
   ): Promise<ActivityLogItem> {
-    return memoryRepository.logActivity(log);
+    const created = await memoryRepository.logActivity(log);
+    await googleSheetsClient.appendSheetRow('Activity Log', GoogleSheetsMapper.activityToRow(created));
+    return created;
   }
 
-  // Notification Operations
+  // Notification Operations (Left to mock memory for now)
   async getNotificationsForUser(userId: number): Promise<AppNotification[]> {
     return memoryRepository.getNotificationsForUser(userId);
   }
@@ -134,7 +175,7 @@ export class DataRepository
     return memoryRepository.markAllAsRead(userId);
   }
 
-  // Settings Operations
+  // Settings Operations (Left to mock memory for now)
   async getConfig(): Promise<AppConfig> {
     return memoryRepository.getConfig();
   }

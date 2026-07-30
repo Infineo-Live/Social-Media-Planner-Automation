@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types/user';
-import { memoryRepository } from '../repositories/memoryRepository';
+import { dataRepository } from '../repositories/dataRepository';
 import { logger } from '../services/logger';
 
 interface AuthContextType {
@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Check saved email or default to Employee (Rahul Sharma)
     const savedEmail = localStorage.getItem('infineo_user_email') || 'rahul@infineo.com';
-    memoryRepository.getUserByEmail(savedEmail).then((user) => {
+    dataRepository.getUserByEmail(savedEmail).then((user) => {
       if (user && user.active) {
         setCurrentUser(user);
       }
@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string): Promise<boolean> => {
     setIsLoading(true);
-    const user = await memoryRepository.getUserByEmail(email);
+    const user = await dataRepository.getUserByEmail(email);
     if (user && user.active) {
       setCurrentUser(user);
       localStorage.setItem('infineo_user_email', user.email);

@@ -45,6 +45,24 @@ export class GoogleSheetsClient {
       return false;
     }
   }
+  async updateSheetRow(sheetName: string, idColumnIndex: number, rowId: string | number, row: any[]): Promise<boolean> {
+    if (appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
+      logger.debug(`[GoogleSheetsClient] Mock update row in ${sheetName}`, { rowId, row });
+      return true;
+    }
+
+    try {
+      const response = await fetch(this.appsScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', sheet: sheetName, idColumnIndex, rowId, row }),
+      });
+      return response.ok;
+    } catch (err) {
+      logger.error(`[GoogleSheetsClient] Failed to update row in ${sheetName}`, { error: err });
+      return false;
+    }
+  }
 }
 
 export const googleSheetsClient = new GoogleSheetsClient();
