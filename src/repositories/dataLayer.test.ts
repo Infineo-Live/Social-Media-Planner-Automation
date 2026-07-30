@@ -99,6 +99,12 @@ describe('Phase 4 Data Layer & Storage Abstraction', () => {
     expect(fetched?.contentId).toBe(newItem.contentId);
   });
 
+  it('getUserByEmail is case-insensitive and trims whitespace', async () => {
+    const user = await dataRepository.getUserByEmail('  Admin@Infineo.COM  ');
+    expect(user).toBeDefined();
+    expect(user?.role).toBe('Admin');
+  });
+
   it('enforces email uniqueness when creating user', async () => {
     await expect(
       dataRepository.createUser({

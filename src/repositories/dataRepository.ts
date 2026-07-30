@@ -41,7 +41,8 @@ export class DataRepository
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const users = await this.getUsers();
-    return users.find(u => u.email === email);
+    const normalized = email.trim().toLowerCase();
+    return users.find(u => u.email.toLowerCase() === normalized);
   }
 
   async createUser(user: Omit<User, 'userId' | 'createdAt' | 'updatedAt'>): Promise<User> {
