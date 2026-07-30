@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Architecture:** React + TypeScript + Vite Web Application & Google Sheets / Apps Script Persistent Storage  
-**Status:** Production Ready  
+**Status:** Production Ready - with authorized apps script
 
 ---
 
