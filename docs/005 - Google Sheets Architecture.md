@@ -85,11 +85,11 @@ This sheet is managed only by Administrators.
 
 Purpose:
 
-Master table containing every reel in the system.
+- Master table containing every reel in the system.
 
-There are no separate sheets for each content series.
+- There are no separate sheets for each content series.
 
-Every reel exists as one row.
+- Every reel exists as one row.
 
 ### Columns
 
