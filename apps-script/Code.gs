@@ -12,12 +12,24 @@
  * 8. Copy the resulting Web App URL into your .env file as VITE_APPS_SCRIPT_URL.
  */
 
+const SPREADSHEET_ID = "1fP47IhZGqb6_XfO4toIQEXSYbpOfv0F5HtwPsjivSS4";
+
+function getSpreadsheet() {
+  try {
+    const active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) return active;
+  } catch (e) {
+    // Ignore and fallback to openById
+  }
+  return SpreadsheetApp.openById(SPREADSHEET_ID);
+}
+
 function doGet(e) {
   try {
     const sheetName = e.parameter.sheet;
     if (!sheetName) throw new Error("Sheet parameter missing");
     
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const spreadsheet = getSpreadsheet();
     const sheet = spreadsheet.getSheetByName(sheetName);
     if (!sheet) throw new Error("Sheet not found: " + sheetName);
     
@@ -41,7 +53,7 @@ function doPost(e) {
     
     if (!sheetName) throw new Error("Sheet parameter missing");
     
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const spreadsheet = getSpreadsheet();
     const sheet = spreadsheet.getSheetByName(sheetName);
     if (!sheet) throw new Error("Sheet not found: " + sheetName);
     
