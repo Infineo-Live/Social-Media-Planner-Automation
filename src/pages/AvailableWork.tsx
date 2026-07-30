@@ -6,11 +6,13 @@ import { ROUTES } from '../config/constants';
 import { StatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
 import { WorkflowEngine } from '../services/workflowEngine';
+import { useToast } from '../context/ToastContext';
 import { FolderPlus, CheckCircle } from 'lucide-react';
 
 export const AvailableWork: React.FC = () => {
   const { currentUser } = useAuth();
   const { contentItems, refreshData } = useApp();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   if (!currentUser) return null;
@@ -29,9 +31,10 @@ export const AvailableWork: React.FC = () => {
         await WorkflowEngine.claimReel(currentUser, item.contentId);
       }
       await refreshData();
+      showToast('Task claimed successfully!', 'success');
       navigate(ROUTES.MY_TASKS);
     } catch (err: any) {
-      alert(err.message || 'Failed to claim task.');
+      showToast(err.message || 'Failed to claim task.', 'error');
     }
   };
 

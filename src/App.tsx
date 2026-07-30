@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './auth/authContext';
 import { AppProvider } from './context/appContext';
+import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './auth/protectedRoute';
 import { MainLayout } from './layout/MainLayout';
 import { ROUTES } from './config/constants';
@@ -24,10 +25,11 @@ import { ProfilePage } from './pages/ProfilePage';
 export function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppProvider>
-          <Routes>
-            <Route path={ROUTES.LOGIN} element={<Login />} />
+      <ToastProvider>
+        <AuthProvider>
+          <AppProvider>
+            <Routes>
+              <Route path={ROUTES.LOGIN} element={<Login />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
             <Route
@@ -166,6 +168,7 @@ export function App() {
           </Routes>
         </AppProvider>
       </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

@@ -10,6 +10,7 @@ import { ActivityLogItem } from '../types/activity';
 import { User } from '../types/user';
 import { StatusBadge } from '../components/StatusBadge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { useToast } from '../context/ToastContext';
 import { ROUTES } from '../config/constants';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import {
@@ -27,6 +28,7 @@ export const ContentDetail: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { seriesList, subSeriesList, refreshData } = useApp();
+  const { showToast } = useToast();
 
   const [item, setItem] = useState<ContentItem | null>(null);
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
@@ -109,16 +111,17 @@ export const ContentDetail: React.FC = () => {
       } else if (item.currentStatus === 'Reel Review (Admin)') {
         await WorkflowEngine.approveReelAdmin(currentUser, item.contentId);
       }
+      showToast('Stage approved successfully!', 'success');
       await refreshData();
       await loadDetail();
     } catch (err: any) {
-      alert(err.message || 'Failed to approve item.');
+      showToast(err.message || 'Failed to approve item.', 'error');
     }
   };
 
   const handleReject = async () => {
     if (!rejectionReason.trim()) {
-      alert('Please provide a reason for rejection.');
+      showToast('Please provide a reason for rejection.', 'info');
       return;
     }
     try {
@@ -137,10 +140,11 @@ export const ContentDetail: React.FC = () => {
       }
       setShowRejectModal(false);
       setRejectionReason('');
+      showToast('Stage returned for revision.', 'info');
       await refreshData();
       await loadDetail();
     } catch (err: any) {
-      alert(err.message || 'Failed to reject item.');
+      showToast(err.message || 'Failed to reject item.', 'error');
     }
   };
 
@@ -151,46 +155,50 @@ export const ContentDetail: React.FC = () => {
       } else if (item.currentStatus === 'Reel WIP') {
         await WorkflowEngine.claimReel(currentUser, item.contentId);
       }
+      showToast('Task claimed successfully!', 'success');
       await refreshData();
       await loadDetail();
     } catch (err: any) {
-      alert(err.message || 'Failed to claim task.');
+      showToast(err.message || 'Failed to claim task.', 'error');
     }
   };
 
   const handleSubmitScript = async () => {
     try {
       await WorkflowEngine.submitScript(currentUser, item.contentId);
+      showToast('Script submitted for review!', 'success');
       await refreshData();
       await loadDetail();
     } catch (err: any) {
-      alert(err.message || 'Failed to submit script.');
+      showToast(err.message || 'Failed to submit script.', 'error');
     }
   };
 
   const handleSubmitReel = async () => {
     try {
       await WorkflowEngine.submitReel(currentUser, item.contentId, canvaInput);
+      showToast('Reel submitted for review!', 'success');
       await refreshData();
       await loadDetail();
     } catch (err: any) {
-      alert(err.message || 'Failed to submit reel.');
+      showToast(err.message || 'Failed to submit reel.', 'error');
     }
   };
 
   const handleSaveMetadata = async () => {
     try {
       await WorkflowEngine.completeMetadata(currentUser, item.contentId, metadataState);
+      showToast('Metadata saved and reel finalized!', 'success');
       await refreshData();
       await loadDetail();
     } catch (err: any) {
-      alert(err.message || 'Failed to complete metadata.');
+      showToast(err.message || 'Failed to complete metadata.', 'error');
     }
   };
 
   const handleSaveScheduling = async () => {
     if (!episodeInput || Number(episodeInput) <= 0) {
-      alert('Valid Episode Number is required for scheduling.');
+      showToast('Valid Episode Number is required for scheduling.', 'error');
       return;
     }
     try {
@@ -200,20 +208,22 @@ export const ContentDetail: React.FC = () => {
         Number(episodeInput),
         scheduledState
       );
+      showToast('Scheduling status updated!', 'success');
       await refreshData();
       await loadDetail();
     } catch (err: any) {
-      alert(err.message || 'Failed to save scheduling.');
+      showToast(err.message || 'Failed to save scheduling.', 'error');
     }
   };
 
   const handleSaveUploads = async () => {
     try {
       await WorkflowEngine.updateUploads(currentUser, item.contentId, uploadedState);
+      showToast('Upload status updated!', 'success');
       await refreshData();
       await loadDetail();
     } catch (err: any) {
-      alert(err.message || 'Failed to save uploads.');
+      showToast(err.message || 'Failed to save uploads.', 'error');
     }
   };
 

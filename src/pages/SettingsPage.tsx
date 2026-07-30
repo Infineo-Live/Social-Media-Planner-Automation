@@ -1,24 +1,24 @@
 import React, { useState } from 'react';
 import { useAuth } from '../auth/authContext';
 import { useApp } from '../context/appContext';
+import { useToast } from '../context/ToastContext';
 import { dataRepository } from '../repositories/dataRepository';
 import { Settings as SettingsIcon, Plus, Save } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const { currentUser } = useAuth();
   const { seriesList, subSeriesList, refreshData } = useApp();
+  const { showToast } = useToast();
 
   const [newSeriesName, setNewSeriesName] = useState('');
   const [newSeriesCode, setNewSeriesCode] = useState('');
   const [newSubSeriesName, setNewSubSeriesName] = useState('');
   const [targetSeriesId, setTargetSeriesId] = useState<number>(seriesList[0]?.seriesId || 1);
-  const [msg, setMsg] = useState<string | null>(null);
 
   if (!currentUser || currentUser.role !== 'Admin') return <div>Access Denied.</div>;
 
   const handleAddSeries = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMsg(null);
     try {
       await dataRepository.addSeries({
         name: newSeriesName.trim(),
@@ -27,16 +27,15 @@ export const SettingsPage: React.FC = () => {
       });
       setNewSeriesName('');
       setNewSeriesCode('');
-      setMsg('Series added successfully.');
+      showToast('Series added successfully!', 'success');
       await refreshData();
     } catch (err: any) {
-      alert(err.message || 'Failed to add series.');
+      showToast(err.message || 'Failed to add series.', 'error');
     }
   };
 
   const handleAddSubSeries = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMsg(null);
     try {
       await dataRepository.addSubSeries({
         seriesId: Number(targetSeriesId),
@@ -44,10 +43,10 @@ export const SettingsPage: React.FC = () => {
         active: true,
       });
       setNewSubSeriesName('');
-      setMsg('Sub-Series added successfully.');
+      showToast('Sub-Series added successfully!', 'success');
       await refreshData();
     } catch (err: any) {
-      alert(err.message || 'Failed to add sub-series.');
+      showToast(err.message || 'Failed to add sub-series.', 'error');
     }
   };
 
@@ -61,12 +60,6 @@ export const SettingsPage: React.FC = () => {
           Configure Series, Sub-Series, Festivals, and global application parameters.
         </p>
       </div>
-
-      {msg && (
-        <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '0.75rem 1rem', borderRadius: '6px', fontSize: '0.875rem' }}>
-          {msg}
-        </div>
-      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
         {/* Manage Series */}
