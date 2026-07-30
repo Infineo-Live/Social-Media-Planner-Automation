@@ -19,8 +19,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check saved email or default to Employee (Rahul Sharma)
-    const savedEmail = localStorage.getItem('infineo_user_email') || 'rahul@infineo.com';
+    // Check saved email or default to Admin (Shreya Agarwal)
+    const savedEmail = localStorage.getItem('infineo_user_email') || 'infineo.live@gmail.com';
     dataRepository.getUserByEmail(savedEmail).then((user) => {
       if (user && user.active) {
         setCurrentUser(user);
