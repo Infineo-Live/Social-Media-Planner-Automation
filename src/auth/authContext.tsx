@@ -26,20 +26,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentUser(user);
       }
       setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
     });
   }, []);
 
   const login = async (email: string): Promise<boolean> => {
     setIsLoading(true);
-    const user = await dataRepository.getUserByEmail(email);
-    if (user && user.active) {
-      setCurrentUser(user);
-      localStorage.setItem('infineo_user_email', user.email);
-      logger.info(`User logged in: ${user.email} (${user.role})`);
-      setIsLoading(false);
-      return true;
+    try {
+      const user = await dataRepository.getUserByEmail(email);
+      if (user && user.active) {
+        setCurrentUser(user);
+        localStorage.setItem('infineo_user_email', user.email);
+        logger.info(`User logged in: ${user.email} (${user.role})`);
+        setIsLoading(false);
+        return true;
+      }
+      logger.warn(`Login failed for email: ${email}`);
+    } catch (err) {
+      logger.error(`Login error for email: ${email}`, { error: err });
     }
-    logger.warn(`Login failed for email: ${email}`);
     setIsLoading(false);
     return false;
   };

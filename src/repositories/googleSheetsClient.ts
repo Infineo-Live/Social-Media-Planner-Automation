@@ -14,17 +14,15 @@ export class GoogleSheetsClient {
       return null; // Signals repository to use memory data store
     }
 
-    try {
-      const response = await fetch(`${this.appsScriptUrl}?sheet=${encodeURIComponent(sheetName)}`);
-      if (!response.ok) {
-        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
-      }
-      const data = await response.json();
-      return data.rows || [];
-    } catch (err) {
-      logger.error(`[GoogleSheetsClient] Failed to fetch sheet ${sheetName}`, { error: err });
-      return null;
+    const response = await fetch(`${this.appsScriptUrl}?sheet=${encodeURIComponent(sheetName)}`);
+    if (!response.ok) {
+      throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
     }
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(`Apps Script error: ${data.error}`);
+    }
+    return data.rows || [];
   }
 
   async appendSheetRow(sheetName: string, row: any[]): Promise<boolean> {
