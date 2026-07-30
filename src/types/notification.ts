@@ -7,3 +7,10 @@ export interface AppNotification {
   timestamp: string;
   read: boolean;
 }
+
+export interface EmailMessage {
+  recipientEmail: string;
+  subject: string;
+  bodyText: string;
+  bodyHtml: string;
+}

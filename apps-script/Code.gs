@@ -104,6 +104,42 @@ function doPost(e) {
         return ContentService.createTextOutput(JSON.stringify({ success: true, appendedInstead: true }))
           .setMimeType(ContentService.MimeType.JSON);
       }
+    } else if (action === 'sendEmail') {
+      const email = payload.email;
+      const emailId = Utilities.getUuid();
+      const createdAt = new Date().toISOString();
+      let status = 'Pending';
+      let sentAt = '';
+
+      try {
+        MailApp.sendEmail({
+          to: email.recipientEmail,
+          subject: email.subject,
+          htmlBody: email.bodyHtml,
+        });
+        status = 'Sent';
+        sentAt = new Date().toISOString();
+      } catch (err) {
+        status = 'Failed';
+      }
+
+      // Columns: Email ID, Recipient, Subject, Body, Status, Created At, Sent At
+      sheet.appendRow([
+        emailId,
+        email.recipientEmail,
+        email.subject,
+        email.bodyText,
+        status,
+        createdAt,
+        sentAt
+      ]);
+
+      if (status === 'Failed') {
+        throw new Error('MailApp failed to send the email.');
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({ success: true }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
     
     throw new Error("Unknown action: " + action);

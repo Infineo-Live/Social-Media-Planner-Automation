@@ -29,6 +29,7 @@ export interface INotificationRepository {
   createNotification(notification: Omit<AppNotification, 'notificationId' | 'timestamp' | 'read'>): Promise<AppNotification>;
   markAsRead(notificationId: number): Promise<void>;
   markAllAsRead(userId: number): Promise<void>;
+  queueEmail(email: import('../types/notification').EmailMessage): Promise<void>;
 }
 
 export interface ISettingsRepository {

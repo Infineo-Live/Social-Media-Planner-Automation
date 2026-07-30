@@ -156,6 +156,13 @@ class MemoryRepository
     });
   }
 
+  async queueEmail(email: import('../types/notification').EmailMessage): Promise<void> {
+    // Mock queueing email
+    import('../services/logger').then(({ logger }) => {
+      logger.info(`[MemoryRepository] Mock queued email to ${email.recipientEmail}`);
+    });
+  }
+
   // Settings Methods
   async getConfig(): Promise<AppConfig> {
     return { ...this.config };

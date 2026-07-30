@@ -1,16 +1,9 @@
 import { appConfig } from '../config/appConfig';
 import { dataRepository } from '../repositories/dataRepository';
-import { AppNotification } from '../types/notification';
+import { AppNotification, EmailMessage } from '../types/notification';
 import { ContentItem } from '../types/content';
 import { User } from '../types/user';
 import { logger } from './logger';
-
-export interface EmailMessage {
-  recipientEmail: string;
-  subject: string;
-  bodyText: string;
-  bodyHtml: string;
-}
 
 export class NotificationService {
   private static recentNotifCache: Set<string> = new Set();
@@ -99,14 +92,19 @@ export class NotificationService {
     };
   }
 
-  // Send Email (respecting feature flag VITE_ENABLE_EMAIL_NOTIFICATIONS)
   static async sendEmailNotification(emailMsg: EmailMessage): Promise<boolean> {
     if (!appConfig.enableEmailNotifications) {
       logger.info(`[NotificationService] Email disabled by feature flag. Skipping email to ${emailMsg.recipientEmail}`);
       return false;
     }
 
-    logger.info(`[NotificationService] Email dispatched to ${emailMsg.recipientEmail}: "${emailMsg.subject}"`);
-    return true;
+    try {
+      await dataRepository.queueEmail(emailMsg);
+      logger.info(`[NotificationService] Email dispatched to ${emailMsg.recipientEmail}: "${emailMsg.subject}"`);
+      return true;
+    } catch (err) {
+      logger.error(`[NotificationService] Failed to queue email to ${emailMsg.recipientEmail}`, { error: err });
+      return false;
+    }
   }
 }

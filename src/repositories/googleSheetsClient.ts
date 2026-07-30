@@ -62,6 +62,25 @@ export class GoogleSheetsClient {
       return false;
     }
   }
+
+  async dispatchEmail(email: import('../types/notification').EmailMessage): Promise<boolean> {
+    if (appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
+      logger.debug(`[GoogleSheetsClient] Mock dispatch email to ${email.recipientEmail}`);
+      return true;
+    }
+
+    try {
+      const response = await fetch(this.appsScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'sendEmail', sheet: 'Email Queue', email }),
+      });
+      return response.ok;
+    } catch (err) {
+      logger.error(`[GoogleSheetsClient] Failed to dispatch email to ${email.recipientEmail}`, { error: err });
+      return false;
+    }
+  }
 }
 
 export const googleSheetsClient = new GoogleSheetsClient();

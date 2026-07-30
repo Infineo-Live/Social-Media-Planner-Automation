@@ -177,6 +177,11 @@ export class DataRepository
     return memoryRepository.markAllAsRead(userId);
   }
 
+  async queueEmail(email: import('../types/notification').EmailMessage): Promise<void> {
+    await memoryRepository.queueEmail(email);
+    await googleSheetsClient.dispatchEmail(email);
+  }
+
   // Settings Operations (Left to mock memory for now)
   async getConfig(): Promise<AppConfig> {
     return memoryRepository.getConfig();
