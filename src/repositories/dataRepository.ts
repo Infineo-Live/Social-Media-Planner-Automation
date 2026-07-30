@@ -28,7 +28,8 @@ export class DataRepository
   async getUsers(): Promise<User[]> {
     const rows = await googleSheetsClient.fetchSheetData('Users');
     if (rows) {
-      return rows.map(r => GoogleSheetsMapper.rowToUser(r));
+      const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
+      return validRows.map((r, idx) => GoogleSheetsMapper.rowToUser(r, idx + 1));
     }
     return memoryRepository.getUsers();
   }

@@ -70,9 +70,26 @@ function doPost(e) {
       let rowIndex = -1;
       
       for (let i = 1; i < data.length; i++) {
-        if (String(data[i][idColumn]) === String(idToFind)) {
-          rowIndex = i + 1; // 1-indexed for SpreadsheetApp
+        // 1. Try matching by ID column if ID exists in sheet
+        if (idToFind && data[i][idColumn] !== "" && String(data[i][idColumn]) === String(idToFind)) {
+          rowIndex = i + 1;
           break;
+        }
+        // 2. Fallback for Users sheet: match by Email (col C/index 2) or Name (col B/index 1)
+        if (sheetName === 'Users') {
+          const emailInSheet = String(data[i][2] || '').toLowerCase().trim();
+          const targetEmail = String(newRow[2] || '').toLowerCase().trim();
+          const nameInSheet = String(data[i][1] || '').toLowerCase().trim();
+          const targetName = String(newRow[1] || '').toLowerCase().trim();
+          
+          if (targetEmail && emailInSheet === targetEmail) {
+            rowIndex = i + 1;
+            break;
+          }
+          if (targetName && nameInSheet === targetName) {
+            rowIndex = i + 1;
+            break;
+          }
         }
       }
       
@@ -82,7 +99,10 @@ function doPost(e) {
         return ContentService.createTextOutput(JSON.stringify({ success: true, updated: true }))
           .setMimeType(ContentService.MimeType.JSON);
       } else {
-        throw new Error("Row ID not found for update");
+        // If row not found, append as new row to avoid failing
+        sheet.appendRow(newRow);
+        return ContentService.createTextOutput(JSON.stringify({ success: true, appendedInstead: true }))
+          .setMimeType(ContentService.MimeType.JSON);
       }
     }
     

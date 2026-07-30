@@ -17,13 +17,17 @@ export class GoogleSheetsMapper {
     ];
   }
 
-  static rowToUser(row: any[]): User {
+  static rowToUser(row: any[], defaultId: number = 1): User {
+    const parsedId = Number(row[0]);
+    const userId = (!isNaN(parsedId) && parsedId > 0) ? parsedId : defaultId;
+    const roleStr = String(row[3] || 'Employee').trim();
+    const role = (['Admin', 'Manager', 'Employee'].includes(roleStr) ? roleStr : 'Employee') as any;
     return {
-      userId: Number(row[0]),
-      fullName: String(row[1] || ''),
-      email: String(row[2] || ''),
-      role: row[3] as any,
-      active: String(row[4]).toLowerCase() === 'true' || row[4] === true,
+      userId,
+      fullName: String(row[1] || '').trim() || 'Unnamed User',
+      email: String(row[2] || '').trim(),
+      role,
+      active: row[4] !== undefined && row[4] !== '' ? (String(row[4]).toLowerCase() === 'true' || row[4] === true) : true,
       createdAt: String(row[5] || new Date().toISOString()),
       updatedAt: String(row[6] || new Date().toISOString()),
     };
