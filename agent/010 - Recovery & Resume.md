@@ -410,15 +410,16 @@ Never infer progress from conversation history.
 Whenever interrupted:
 
 ```
-Read RUNNING
+Crash Recovery Algorithm
 
-↓
-
-Read Project State
-
-↓
-
-Verify Repository
+1. Read RUNNING.md
+2. Read Project State.md
+3. Determine Current Phase.
+4. Read ONLY the definition for that phase.
+5. Verify the repository satisfies every previously completed phase.
+6. Resume the first incomplete task.
+7. Never repeat completed work.
+8. Continue normal execution.
 
 ↓
 

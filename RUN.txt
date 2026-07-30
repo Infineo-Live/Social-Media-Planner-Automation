@@ -1,0 +1,11 @@
+Read agent/000 - RUNNING.md.
+
+Follow it exactly.
+
+Do not ask for confirmation between phases.
+
+Continue until:
+- the project is fully complete,
+- or a true blocking dependency prevents further implementation.
+
+Treat Project State.md as the only memory of implementation progress.

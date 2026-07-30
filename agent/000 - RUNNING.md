@@ -49,69 +49,35 @@ Speed is secondary to correctness.
 
 ---
 
-# 3. Mandatory Reading Order
+# 3. Startup Reading Strategy
 
-Read documents in the exact order below.
+If Project State indicates:
 
-## Phase A — Project Understanding
+Repository Status = Not Started
 
-Read:
+Perform ONE complete documentation pass:
 
-- 000 - Project Overview
-- 001 - Business Requirements
-- 002 - System Architecture
+1. Read all project architecture documents.
+2. Read all agent documents.
+3. Build the implementation plan.
+4. Begin Phase 1.
 
-Understand the business before reading implementation details.
+----------------------------------------------------
 
----
+If Project State already exists and Repository Status is "In Progress":
 
-## Phase B — Functional Requirements
+DO NOT reread the complete documentation.
 
-Read:
+Read ONLY:
 
-- 003 - User Roles & Permissions
-- 004 - Data Model
-- 005 - Google Sheets Architecture
-- 006 - Workflow Engine
-- 007 - Business Rules
+1. 000 - RUNNING.md
+2. 004 - Project State.md
+3. 003 - Phase Definitions.md
+4. Documents explicitly required for the current phase.
 
-These documents define system behavior.
+Reload additional documents ONLY when they are referenced by the current phase or when implementation requires them.
 
-They override implementation assumptions.
-
----
-
-## Phase C — User Experience
-
-Read:
-
-- 008 - Screens & Navigation
-- 009 - Dashboard Specifications
-- 010 - Task Management
-- 011 - Notifications
-- 012 - Search, Filters & Views
-- 013 - Settings & Master Data
-- 014 - Security & Access Control
-- 015 - UI Design System
-
----
-
-## Phase D — Implementation Standards
-
-Read:
-
-- 016 - Email Templates
-- 017 - Error Handling & Edge Cases
-- 018 - Development Standards
-- 019 - Testing Checklist
-- 020 - Migration Plan
-- 021 - Future Enhancements
-
-Future Enhancements are informational only.
-
-Do NOT implement them unless explicitly required by Version 1.
-
-The architecture, workflow, configuration philosophy, and implementation standards defined in the project documentation are authoritative and must be followed throughout implementation. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
+Never reload the complete documentation set unless the repository has been intentionally reset.
 
 ---
 
@@ -156,6 +122,31 @@ If implementation has already started,
 resume from the recorded phase.
 
 Never restart the project.
+
+---
+
+# Project Memory
+
+Project State.md is the ONLY authoritative memory of implementation progress.
+
+Do not infer progress from:
+
+- previous conversations
+- memory
+- assumptions
+- repository structure alone
+
+Whenever a conflict exists:
+
+Project State overrides assumptions.
+
+If Project State and repository disagree:
+
+Verify the repository.
+
+Repair Project State.
+
+Continue.
 
 ---
 
