@@ -26,15 +26,15 @@ export class WorkflowEngine {
     data: {
       seriesId: number;
       subSeriesId?: number;
-      workingTitle?: string;
-      realLifeProblem: string;
+      title: string;
+      plannedUploadDate?: string;
       mythologyStory?: string;
     }
   ): Promise<ContentItem> {
     if (!user || !user.active) throw new PermissionError('Inactive or missing user.');
     if (!data.seriesId) throw new ValidationError('Series is required.');
-    if (!isNonEmptyString(data.realLifeProblem)) {
-      throw new ValidationError('Real Life Problem statement is required.');
+    if (!isNonEmptyString(data.title)) {
+      throw new ValidationError('Title is required.');
     }
 
     const managerId = await this.getManagerUserId();
@@ -42,8 +42,8 @@ export class WorkflowEngine {
     const newContent = await dataRepository.createContentItem({
       seriesId: data.seriesId,
       subSeriesId: data.subSeriesId,
-      workingTitle: data.workingTitle,
-      realLifeProblem: data.realLifeProblem,
+      title: data.title,
+      plannedUploadDate: data.plannedUploadDate,
       mythologyStory: data.mythologyStory,
       currentStatus: 'Idea Review (Manager)',
       assignedUserId: managerId,

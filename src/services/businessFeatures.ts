@@ -21,11 +21,10 @@ export class BusinessFeaturesService {
     return items.filter((item) => {
       if (criteria.searchTerm) {
         const term = criteria.searchTerm.toLowerCase();
-        const matchesTitle = item.workingTitle?.toLowerCase().includes(term);
-        const matchesProblem = item.realLifeProblem.toLowerCase().includes(term);
+        const matchesTitle = item.title?.toLowerCase().includes(term);
         const matchesStory = item.mythologyStory?.toLowerCase().includes(term);
         const matchesCanva = item.currentCanvaLink?.toLowerCase().includes(term);
-        if (!matchesTitle && !matchesProblem && !matchesStory && !matchesCanva) {
+        if (!matchesTitle && !matchesStory && !matchesCanva) {
           return false;
         }
       }

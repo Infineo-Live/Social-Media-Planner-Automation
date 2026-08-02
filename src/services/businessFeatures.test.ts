@@ -22,14 +22,14 @@ describe('Phase 7 Business Features Integration', () => {
     expect(filtered.every((i) => i.currentStatus === 'Script WIP')).toBe(true);
   });
 
-  it('filters content by full-text search term across title, problem, and story', () => {
+  it('filters content by full-text search term across title and story', () => {
     const filtered = BusinessFeaturesService.filterContentItems(testItems, {
       searchTerm: 'Krishna',
     });
     expect(filtered.length).toBeGreaterThanOrEqual(1);
 
     const matches = filtered.some((item) => {
-      const text = `${item.workingTitle || ''} ${item.realLifeProblem} ${item.mythologyStory || ''}`;
+      const text = `${item.title} ${item.mythologyStory || ''}`;
       return text.toLowerCase().includes('krishna');
     });
     expect(matches).toBe(true);

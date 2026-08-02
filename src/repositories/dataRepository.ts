@@ -96,8 +96,8 @@ export class DataRepository
     if (!item.seriesId) {
       throw new ValidationError('Every Content Item must belong to a primary Series.');
     }
-    if (!isNonEmptyString(item.realLifeProblem)) {
-      throw new ValidationError('Real Life Problem description is required.');
+    if (!isNonEmptyString(item.title)) {
+      throw new ValidationError('Title is required.');
     }
 
     const created = await memoryRepository.createContentItem(item);

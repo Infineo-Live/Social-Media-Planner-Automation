@@ -48,7 +48,7 @@ export class NotificationService {
     actor: User,
     notes?: string
   ): EmailMessage {
-    const titleOrProblem = item.workingTitle || item.realLifeProblem;
+    const titleOrProblem = item.title;
     let subject = '';
     let bodyText = '';
 

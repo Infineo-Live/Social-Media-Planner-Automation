@@ -11,11 +11,123 @@ import { ActivityLogItem } from '../types/activity';
 import { AppNotification } from '../types/notification';
 import { appConfig, AppConfig } from '../config/appConfig';
 
-// Initial Seed Users (Empty - all data fetched directly from Google Sheets)
-const seedUsers: User[] = [];
+// Initial Seed Users
+const seedUsers: User[] = [
+  {
+    userId: 1,
+    fullName: 'Shreya Agarwal',
+    email: 'admin@infineo.com',
+    role: 'Admin',
+    active: true,
+    createdAt: '2026-07-30T10:00:00Z',
+    updatedAt: '2026-07-30T10:00:00Z',
+  },
+  {
+    userId: 2,
+    fullName: 'Sonal Agarwal',
+    email: 'manager@infineo.com',
+    role: 'Manager',
+    active: true,
+    createdAt: '2026-07-30T10:00:00Z',
+    updatedAt: '2026-07-30T10:00:00Z',
+  },
+  {
+    userId: 3,
+    fullName: 'Rahul Sharma',
+    email: 'rahul@infineo.com',
+    role: 'Employee',
+    active: true,
+    createdAt: '2026-07-30T10:00:00Z',
+    updatedAt: '2026-07-30T10:00:00Z',
+  },
+  {
+    userId: 4,
+    fullName: 'Priya Singh',
+    email: 'priya@infineo.com',
+    role: 'Employee',
+    active: true,
+    createdAt: '2026-07-30T10:00:00Z',
+    updatedAt: '2026-07-30T10:00:00Z',
+  },
+];
 
-// Initial Seed Content Items (Empty - all data fetched directly from Google Sheets)
-const seedContent: ContentItem[] = [];
+// Initial Seed Content Items
+const seedContent: ContentItem[] = [
+  {
+    contentId: 101,
+    seriesId: 1,
+    subSeriesId: 5,
+    title: 'Managing Anger Through Patience',
+    mythologyStory: 'Story of Sage Vashistha and Vishwamitra.',
+    episodeNumber: 1,
+    plannedUploadDate: '2026-08-10',
+    currentStatus: 'Completed',
+    assignedUserId: undefined,
+    createdByUserId: 3,
+    currentCanvaLink: 'https://canva.com/design/example101',
+    metadata: {
+      youtubeTitle: 'Neo Ki Paathshala Ep 1',
+      youtubeDescription: 'How to manage anger with patience.',
+      youtubeTags: 'patience, anger management, neo',
+      instagramCaption: 'Overcoming anger made simple!',
+      instagramPoll: 'Do you get angry easily?',
+      linkedInCaption: 'Leadership & patience lessons.',
+      twitterCaption: 'Mastering patience in work.',
+    },
+    scheduled: { YouTube: true, Instagram: true, LinkedIn: false, Twitter: false },
+    uploaded: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+  },
+  {
+    contentId: 102,
+    seriesId: 2,
+    subSeriesId: 1,
+    title: 'Janmashtami Special: Lord Krishna & Significance of Butter',
+    mythologyStory: 'Makhanchor stories from Vrindavan.',
+    episodeNumber: undefined,
+    plannedUploadDate: undefined,
+    currentStatus: 'Script WIP',
+    assignedUserId: 3,
+    createdByUserId: 4,
+    currentCanvaLink: '',
+    metadata: {
+      youtubeTitle: '',
+      youtubeDescription: '',
+      youtubeTags: '',
+      instagramCaption: '',
+      instagramPoll: '',
+      linkedInCaption: '',
+      twitterCaption: '',
+    },
+    scheduled: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    uploaded: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    contentId: 103,
+    seriesId: 3,
+    title: 'Office Work vs Weekend Expectations',
+    currentStatus: 'Reel WIP',
+    assignedUserId: 4,
+    createdByUserId: 4,
+    currentCanvaLink: 'https://canva.com/design/example103',
+    metadata: {
+      youtubeTitle: '',
+      youtubeDescription: '',
+      youtubeTags: '',
+      instagramCaption: '',
+      instagramPoll: '',
+      linkedInCaption: '',
+      twitterCaption: '',
+    },
+    scheduled: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    uploaded: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+  },
+];
 
 class MemoryRepository
   implements

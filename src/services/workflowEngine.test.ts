@@ -19,8 +19,7 @@ describe('Phase 5 Workflow Engine', () => {
     // 1. Employee creates Idea
     const idea = await WorkflowEngine.createIdea(employee, {
       seriesId: 1,
-      workingTitle: 'End-to-End Test Reel',
-      realLifeProblem: 'Overcoming stress at workplace',
+      title: 'End-to-End Test Reel Title',
       mythologyStory: 'Gita chapter 2 summary',
     });
     expect(idea.currentStatus).toBe('Idea Review (Manager)');
@@ -119,7 +118,7 @@ describe('Phase 5 Workflow Engine', () => {
     // Create Idea
     const idea = await WorkflowEngine.createIdea(employee, {
       seriesId: 1,
-      realLifeProblem: 'Rejection test problem',
+      title: 'Rejection test problem title',
     });
 
     // Manager rejects Idea -> returns to creator
@@ -135,7 +134,7 @@ describe('Phase 5 Workflow Engine', () => {
   it('blocks submitting reel without valid Canva URL', async () => {
     const item = await dataRepository.createContentItem({
       seriesId: 1,
-      realLifeProblem: 'Canva validation test',
+      title: 'Canva validation test',
       currentStatus: 'Reel WIP',
       assignedUserId: employee.userId,
       createdByUserId: employee.userId,
@@ -160,7 +159,7 @@ describe('Phase 5 Workflow Engine', () => {
   it('blocks employee from performing Manager/Admin actions', async () => {
     const item = await dataRepository.createContentItem({
       seriesId: 1,
-      realLifeProblem: 'Permission test',
+      title: 'Permission test',
       currentStatus: 'Idea Review (Manager)',
       assignedUserId: manager.userId,
       createdByUserId: employee.userId,

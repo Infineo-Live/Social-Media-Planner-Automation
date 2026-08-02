@@ -13,8 +13,8 @@ export const CreateContent: React.FC = () => {
 
   const [seriesId, setSeriesId] = useState<number>(() => seriesList[0]?.seriesId || 0);
   const [subSeriesId, setSubSeriesId] = useState<number | undefined>(undefined);
-  const [workingTitle, setWorkingTitle] = useState('');
-  const [realLifeProblem, setRealLifeProblem] = useState('');
+  const [title, setTitle] = useState('');
+  const [plannedUploadDate, setPlannedUploadDate] = useState('');
   const [mythologyStory, setMythologyStory] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -31,8 +31,8 @@ export const CreateContent: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!realLifeProblem.trim()) {
-      setError('Real Life Problem statement is mandatory.');
+    if (!title.trim()) {
+      setError('Title is mandatory.');
       return;
     }
 
@@ -40,8 +40,8 @@ export const CreateContent: React.FC = () => {
       const created = await WorkflowEngine.createIdea(currentUser, {
         seriesId: Number(seriesId),
         subSeriesId: subSeriesId ? Number(subSeriesId) : undefined,
-        workingTitle: workingTitle.trim() || undefined,
-        realLifeProblem: realLifeProblem.trim(),
+        title: title.trim(),
+        plannedUploadDate: plannedUploadDate.trim() || undefined,
         mythologyStory: mythologyStory.trim() || undefined,
       });
 
@@ -179,13 +179,13 @@ export const CreateContent: React.FC = () => {
 
           <div>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-              Working Title (Optional)
+              Title *
             </label>
             <input
               type="text"
-              placeholder="e.g. Overcoming Work Anger"
-              value={workingTitle}
-              onChange={(e) => setWorkingTitle(e.target.value)}
+              placeholder="e.g. Overcoming Work Anger with Patience"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.75rem',
@@ -200,13 +200,12 @@ export const CreateContent: React.FC = () => {
 
           <div>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
-              Real Life Problem Statement *
+              Planned Upload Date (Optional)
             </label>
-            <textarea
-              rows={4}
-              placeholder="Describe the real-life struggle or modern scenario this reel addresses..."
-              value={realLifeProblem}
-              onChange={(e) => setRealLifeProblem(e.target.value)}
+            <input
+              type="date"
+              value={plannedUploadDate}
+              onChange={(e) => setPlannedUploadDate(e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.75rem',
