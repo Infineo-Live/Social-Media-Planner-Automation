@@ -33,8 +33,8 @@ describe('Phase 4 Data Layer & Storage Abstraction', () => {
       contentId: 500,
       seriesId: 1,
       subSeriesId: 5,
-      workingTitle: 'Test Content',
-      realLifeProblem: 'Test problem text',
+      title: 'Test Content Title',
+      plannedUploadDate: '2026-08-15',
       episodeNumber: 15,
       currentStatus: 'Script WIP',
       assignedUserId: 3,
@@ -58,7 +58,8 @@ describe('Phase 4 Data Layer & Storage Abstraction', () => {
     const row = GoogleSheetsMapper.contentToRow(item, 'Neo Ki Paathshala', 'Childhood Values');
     expect(row[0]).toBe(500);
     expect(row[1]).toBe('Neo Ki Paathshala');
-    expect(row[4]).toBe('Test problem text');
+    expect(row[3]).toBe('Test Content Title');
+    expect(row[6]).toBe('2026-08-15');
 
     const reconstructed = GoogleSheetsMapper.rowToContent(
       row,
@@ -67,7 +68,8 @@ describe('Phase 4 Data Layer & Storage Abstraction', () => {
     );
 
     expect(reconstructed.contentId).toBe(item.contentId);
-    expect(reconstructed.realLifeProblem).toBe(item.realLifeProblem);
+    expect(reconstructed.title).toBe(item.title);
+    expect(reconstructed.plannedUploadDate).toBe('2026-08-15');
     expect(reconstructed.episodeNumber).toBe(15);
     expect(reconstructed.scheduled.YouTube).toBe(true);
   });
@@ -75,7 +77,7 @@ describe('Phase 4 Data Layer & Storage Abstraction', () => {
   it('creates and retrieves ContentItem using dataRepository', async () => {
     const newItem = await dataRepository.createContentItem({
       seriesId: 1,
-      realLifeProblem: 'Overcoming procrastination in daily work',
+      title: 'Overcoming procrastination in daily work',
       currentStatus: 'Idea',
       createdByUserId: 3,
       metadata: {
@@ -92,7 +94,7 @@ describe('Phase 4 Data Layer & Storage Abstraction', () => {
     });
 
     expect(newItem.contentId).toBeGreaterThan(100);
-    expect(newItem.realLifeProblem).toContain('procrastination');
+    expect(newItem.title).toContain('procrastination');
 
     const fetched = await dataRepository.getContentItemById(newItem.contentId);
     expect(fetched).toBeDefined();
@@ -119,7 +121,7 @@ describe('Phase 4 Data Layer & Storage Abstraction', () => {
   it('enforces episode number uniqueness within series', async () => {
     const item1 = await dataRepository.createContentItem({
       seriesId: 1,
-      realLifeProblem: 'Episode 50 test item 1',
+      title: 'Episode 50 test item 1',
       currentStatus: 'Completed',
       createdByUserId: 3,
       metadata: {
@@ -139,7 +141,7 @@ describe('Phase 4 Data Layer & Storage Abstraction', () => {
 
     const item2 = await dataRepository.createContentItem({
       seriesId: 1,
-      realLifeProblem: 'Episode 50 test item 2',
+      title: 'Episode 50 test item 2',
       currentStatus: 'Completed',
       createdByUserId: 3,
       metadata: {

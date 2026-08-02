@@ -34,15 +34,20 @@ export class GoogleSheetsMapper {
   }
 
   // Map ContentItem domain object <-> Sheet row array
+  // Content Sheet Column Schema:
+  // 0:contentId  1:seriesName  2:subSeriesName  3:title  4:mythologyStory
+  // 5:episodeNumber  6:plannedUploadDate  7:currentStatus  8:assignedUserId
+  // 9:createdByUserId  10:currentCanvaLink  11-17:metadata  18-21:scheduled
+  // 22-25:uploaded  26:createdAt  27:updatedAt
   static contentToRow(item: ContentItem, seriesName: string, subSeriesName?: string): (string | number | boolean)[] {
     return [
       item.contentId,
       seriesName,
       subSeriesName || '',
-      item.workingTitle || '',
-      item.realLifeProblem,
+      item.title,
       item.mythologyStory || '',
       item.episodeNumber ?? '',
+      item.plannedUploadDate || '',
       item.currentStatus,
       item.assignedUserId ?? '',
       item.createdByUserId,
@@ -72,10 +77,10 @@ export class GoogleSheetsMapper {
       contentId: Number(row[0]),
       seriesId: seriesIdMap(String(row[1] || '')),
       subSeriesId: row[2] ? subSeriesIdMap(String(row[2])) : undefined,
-      workingTitle: String(row[3] || '') || undefined,
-      realLifeProblem: String(row[4] || ''),
-      mythologyStory: String(row[5] || '') || undefined,
-      episodeNumber: row[6] !== '' && row[6] !== undefined && row[6] !== null ? Number(row[6]) : undefined,
+      title: String(row[3] || ''),
+      mythologyStory: String(row[4] || '') || undefined,
+      episodeNumber: row[5] !== '' && row[5] !== undefined && row[5] !== null ? Number(row[5]) : undefined,
+      plannedUploadDate: String(row[6] || '') || undefined,
       currentStatus: row[7] as any,
       assignedUserId: row[8] ? Number(row[8]) : undefined,
       createdByUserId: Number(row[9]),

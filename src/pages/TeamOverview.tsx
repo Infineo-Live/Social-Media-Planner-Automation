@@ -66,7 +66,7 @@ export const TeamOverview: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   {assigned.map((item) => (
                     <div key={item.contentId} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>#{item.contentId} {item.workingTitle || item.realLifeProblem.slice(0, 20)}...</span>
+                      <span>#{item.contentId} {item.title.slice(0, 25)}...</span>
                       <strong style={{ color: 'var(--accent-primary)' }}>{item.currentStatus}</strong>
                     </div>
                   ))}

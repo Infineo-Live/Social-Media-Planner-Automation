@@ -312,7 +312,7 @@ export const Dashboard: React.FC = () => {
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                 <th style={{ padding: '0.75rem' }}>ID</th>
-                <th style={{ padding: '0.75rem' }}>Title / Problem</th>
+                <th style={{ padding: '0.75rem' }}>Title</th>
                 <th style={{ padding: '0.75rem' }}>Status</th>
                 <th style={{ padding: '0.75rem' }}>Actions</th>
               </tr>
@@ -322,7 +322,7 @@ export const Dashboard: React.FC = () => {
                 <tr key={item.contentId} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '0.75rem', color: 'var(--text-secondary)' }}>#{item.contentId}</td>
                   <td style={{ padding: '0.75rem', fontWeight: 500, color: 'var(--text-primary)' }}>
-                    {item.workingTitle || item.realLifeProblem}
+                    {item.title}
                   </td>
                   <td style={{ padding: '0.75rem' }}>
                     <StatusBadge status={item.currentStatus} />

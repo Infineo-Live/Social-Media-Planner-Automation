@@ -98,6 +98,10 @@ export const ContentDetail: React.FC = () => {
   const assignedUser = users.find((u) => u.userId === item.assignedUserId);
   const creatorUser = users.find((u) => u.userId === item.createdByUserId);
 
+  const isPlannedDateLocked =
+    Object.values(item.scheduled).some(Boolean) ||
+    Object.values(item.uploaded).some(Boolean);
+
   // Workflow Handlers
   const handleApprove = async () => {
     try {
@@ -274,7 +278,7 @@ export const ContentDetail: React.FC = () => {
             </span>
           </div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            {item.workingTitle || item.realLifeProblem}
+            {item.title}
           </h1>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
             Assigned to:{' '}
@@ -506,10 +510,37 @@ export const ContentDetail: React.FC = () => {
                 </select>
               </div>
               <div>
-                <span style={{ color: 'var(--text-muted)' }}>Real Life Problem:</span>
-                <p style={{ color: 'var(--text-primary)', marginTop: '0.25rem', backgroundColor: 'var(--bg-main)', padding: '0.75rem', borderRadius: '6px' }}>
-                  {item.realLifeProblem}
-                </p>
+                <span style={{ color: 'var(--text-muted)' }}>Planned Upload Date:</span>
+                <input
+                  type="date"
+                  value={item.plannedUploadDate || ''}
+                  disabled={isPlannedDateLocked}
+                  readOnly={isPlannedDateLocked}
+                  onChange={async (e) => {
+                    if (isPlannedDateLocked) return;
+                    const val = e.target.value || undefined;
+                    try {
+                      const updated = await dataRepository.updateContentItem(item.contentId, { plannedUploadDate: val });
+                      if (updated) setItem(updated);
+                      showToast('Planned upload date updated!', 'success');
+                      await refreshData();
+                    } catch (err: any) {
+                      showToast(err.message || 'Failed to update planned upload date.', 'error');
+                    }
+                  }}
+                  style={{
+                    display: 'block',
+                    marginTop: '0.25rem',
+                    padding: '0.5rem 0.75rem',
+                    backgroundColor: 'var(--bg-main)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '6px',
+                    color: isPlannedDateLocked ? 'var(--text-muted)' : 'var(--text-primary)',
+                    fontSize: '0.875rem',
+                    opacity: isPlannedDateLocked ? 0.7 : 1,
+                    cursor: isPlannedDateLocked ? 'not-allowed' : 'pointer',
+                  }}
+                />
               </div>
               {item.mythologyStory && (
                 <div>

@@ -9,7 +9,7 @@ export class GoogleSheetsClient {
   }
 
   async fetchSheetData(sheetName: string): Promise<any[][] | null> {
-    if (appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
+    if (import.meta.env.MODE === 'test' || (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') || appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
       logger.debug(`[GoogleSheetsClient] Using mock data store for sheet: ${sheetName}`);
       return null; // Signals repository to use memory data store
     }
@@ -26,7 +26,7 @@ export class GoogleSheetsClient {
   }
 
   async appendSheetRow(sheetName: string, row: any[]): Promise<boolean> {
-    if (appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
+    if (import.meta.env.MODE === 'test' || (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') || appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
       logger.debug(`[GoogleSheetsClient] Mock append row to ${sheetName}`, { row });
       return true;
     }
@@ -45,7 +45,7 @@ export class GoogleSheetsClient {
   }
 
   async updateSheetRow(sheetName: string, idColumnIndex: number, rowId: string | number, row: any[]): Promise<boolean> {
-    if (appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
+    if (import.meta.env.MODE === 'test' || (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') || appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
       logger.debug(`[GoogleSheetsClient] Mock update row in ${sheetName}`, { rowId, row });
       return true;
     }
@@ -64,7 +64,7 @@ export class GoogleSheetsClient {
   }
 
   async dispatchEmail(email: import('../types/notification').EmailMessage): Promise<boolean> {
-    if (appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
+    if (import.meta.env.MODE === 'test' || (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') || appConfig.enableMockData || !this.appsScriptUrl || this.appsScriptUrl.includes('YOUR_')) {
       logger.debug(`[GoogleSheetsClient] Mock dispatch email to ${email.recipientEmail}`);
       return true;
     }

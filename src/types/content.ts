@@ -52,10 +52,10 @@ export interface ContentItem {
   contentId: number;
   seriesId: number;
   subSeriesId?: number;
-  workingTitle?: string;
-  realLifeProblem: string;
+  title: string;
   mythologyStory?: string;
   episodeNumber?: number;
+  plannedUploadDate?: string;
   currentStatus: WorkflowStatus;
   assignedUserId?: number;
   createdByUserId: number;

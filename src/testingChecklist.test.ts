@@ -22,7 +22,7 @@ describe('Phase 11 Testing Checklist Verification (docs/019)', () => {
     const employee = (await memoryRepository.getUserByEmail('rahul@infineo.com'))!;
     const idea = await WorkflowEngine.createIdea(employee, {
       seriesId: 1,
-      realLifeProblem: 'TC-02 Test Problem',
+      title: 'TC-02 Test Problem',
     });
     expect(idea.currentStatus).toBe('Idea Review (Manager)');
   });

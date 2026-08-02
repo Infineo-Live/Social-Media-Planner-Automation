@@ -66,8 +66,7 @@ describe('Phase 3 Authentication & Authorization', () => {
     const testItem: ContentItem = {
       contentId: 200,
       seriesId: 1,
-      workingTitle: 'Test Reel',
-      realLifeProblem: 'Test problem',
+      title: 'Test Reel',
       currentStatus: 'Script WIP',
       assignedUserId: employeeUser.userId,
       createdByUserId: employeeUser.userId,

@@ -73,11 +73,8 @@ export const MyTasks: React.FC = () => {
                   <StatusBadge status={item.currentStatus} />
                 </div>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-                  {item.workingTitle || item.realLifeProblem}
+                  {item.title}
                 </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {item.realLifeProblem}
-                </p>
               </div>
 
               <button

@@ -17,8 +17,7 @@ export const ContentLibrary: React.FC = () => {
   const filteredItems = contentItems.filter((item) => {
     const matchesSearch =
       !searchTerm ||
-      (item.workingTitle && item.workingTitle.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      item.realLifeProblem.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.mythologyStory && item.mythologyStory.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesSeries = selectedSeries === 'all' || item.seriesId === Number(selectedSeries);
@@ -177,7 +176,7 @@ export const ContentLibrary: React.FC = () => {
                         {s ? s.shortCode : '-'}
                       </td>
                       <td style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-primary)' }}>
-                        {item.workingTitle || item.realLifeProblem}
+                        {item.title}
                       </td>
                       <td style={{ padding: '0.85rem 1rem' }}>
                         <StatusBadge status={item.currentStatus} />
