@@ -215,6 +215,14 @@ class MemoryRepository
     this.series[index] = updated;
     return updated;
   }
+
+  async updateSubSeries(subSeriesId: number, updates: Partial<SubSeries>): Promise<SubSeries> {
+    const index = this.subSeries.findIndex((s) => s.subSeriesId === subSeriesId);
+    if (index === -1) throw new Error(`SubSeries ${subSeriesId} not found.`);
+    const updated = { ...this.subSeries[index], ...updates };
+    this.subSeries[index] = updated;
+    return updated;
+  }
 }
 
 export const memoryRepository = new MemoryRepository();

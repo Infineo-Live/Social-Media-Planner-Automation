@@ -3,7 +3,8 @@ import { useAuth } from '../auth/authContext';
 import { useApp } from '../context/appContext';
 import { useToast } from '../context/ToastContext';
 import { dataRepository } from '../repositories/dataRepository';
-import { Settings as SettingsIcon, Plus, Save } from 'lucide-react';
+import { Series, SubSeries } from '../types/content';
+import { Plus } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -13,6 +14,13 @@ export const SettingsPage: React.FC = () => {
   const [newSeriesName, setNewSeriesName] = useState('');
   const [newSeriesCode, setNewSeriesCode] = useState('');
   const [newSubSeriesName, setNewSubSeriesName] = useState('');
+
+  const [editingSeriesId, setEditingSeriesId] = useState<number | null>(null);
+  const [editSeriesName, setEditSeriesName] = useState('');
+  const [editSeriesCode, setEditSeriesCode] = useState('');
+
+  const [editingSubSeriesId, setEditingSubSeriesId] = useState<number | null>(null);
+  const [editSubSeriesName, setEditSubSeriesName] = useState('');
 
   if (!currentUser || currentUser.role !== 'Admin') return <div>Access Denied.</div>;
 
@@ -33,6 +41,30 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleToggleSeriesActive = async (series: Series) => {
+    try {
+      await dataRepository.updateSeries(series.seriesId, { active: !series.active });
+      showToast(`Series '${series.name}' ${!series.active ? 'enabled' : 'disabled'}.`, 'success');
+      await refreshData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update series.', 'error');
+    }
+  };
+
+  const handleSaveSeriesEdit = async (seriesId: number) => {
+    try {
+      await dataRepository.updateSeries(seriesId, {
+        name: editSeriesName.trim(),
+        shortCode: editSeriesCode.trim().toUpperCase(),
+      });
+      setEditingSeriesId(null);
+      showToast('Series updated successfully!', 'success');
+      await refreshData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update series.', 'error');
+    }
+  };
+
   const handleAddSubSeries = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -45,6 +77,29 @@ export const SettingsPage: React.FC = () => {
       await refreshData();
     } catch (err: any) {
       showToast(err.message || 'Failed to add sub-series.', 'error');
+    }
+  };
+
+  const handleToggleSubSeriesActive = async (subSeries: SubSeries) => {
+    try {
+      await dataRepository.updateSubSeries(subSeries.subSeriesId, { active: !subSeries.active });
+      showToast(`Sub-Series '${subSeries.name}' ${!subSeries.active ? 'enabled' : 'disabled'}.`, 'success');
+      await refreshData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update sub-series.', 'error');
+    }
+  };
+
+  const handleSaveSubSeriesEdit = async (subSeriesId: number) => {
+    try {
+      await dataRepository.updateSubSeries(subSeriesId, {
+        name: editSubSeriesName.trim(),
+      });
+      setEditingSubSeriesId(null);
+      showToast('Sub-Series updated successfully!', 'success');
+      await refreshData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update sub-series.', 'error');
     }
   };
 
@@ -94,9 +149,67 @@ export const SettingsPage: React.FC = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {seriesList.map((s) => (
-              <div key={s.seriesId} style={{ backgroundColor: 'var(--bg-main)', padding: '0.6rem 0.85rem', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
-                <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>[{s.shortCode}]</span>
+              <div key={s.seriesId} style={{ backgroundColor: 'var(--bg-main)', padding: '0.6rem 0.85rem', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', fontSize: '0.85rem' }}>
+                {editingSeriesId === s.seriesId ? (
+                  <div style={{ display: 'flex', gap: '0.35rem', flex: 1, alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      value={editSeriesName}
+                      onChange={(e) => setEditSeriesName(e.target.value)}
+                      style={{ flex: 2, padding: '0.3rem 0.5rem', fontSize: '0.85rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '4px', color: 'var(--text-primary)' }}
+                    />
+                    <input
+                      type="text"
+                      value={editSeriesCode}
+                      onChange={(e) => setEditSeriesCode(e.target.value)}
+                      style={{ width: '60px', padding: '0.3rem 0.5rem', fontSize: '0.85rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '4px', color: 'var(--text-primary)' }}
+                    />
+                    <button
+                      onClick={() => handleSaveSeriesEdit(s.seriesId)}
+                      style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingSeriesId(null)}
+                      style={{ padding: '0.3rem 0.6rem', backgroundColor: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontWeight: 600, color: s.active ? 'var(--text-primary)' : 'var(--text-muted)', textDecoration: s.active ? 'none' : 'line-through' }}>{s.name}</span>
+                      <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>[{s.shortCode}]</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => {
+                          setEditingSeriesId(s.seriesId);
+                          setEditSeriesName(s.name);
+                          setEditSeriesCode(s.shortCode);
+                        }}
+                        style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleSeriesActive(s)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: s.active ? 'var(--danger)' : 'var(--accent-primary)',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {s.active ? 'Disable' : 'Enable'}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -128,11 +241,57 @@ export const SettingsPage: React.FC = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {subSeriesList.map((sub) => (
-              <div key={sub.subSeriesId} style={{ backgroundColor: 'var(--bg-main)', padding: '0.6rem 0.85rem', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{sub.name}</span>
-                <span style={{ color: sub.active ? 'var(--accent-primary)' : 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600 }}>
-                  {sub.active ? 'Active' : 'Inactive'}
-                </span>
+              <div key={sub.subSeriesId} style={{ backgroundColor: 'var(--bg-main)', padding: '0.6rem 0.85rem', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', fontSize: '0.85rem' }}>
+                {editingSubSeriesId === sub.subSeriesId ? (
+                  <div style={{ display: 'flex', gap: '0.35rem', flex: 1, alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      value={editSubSeriesName}
+                      onChange={(e) => setEditSubSeriesName(e.target.value)}
+                      style={{ flex: 1, padding: '0.3rem 0.5rem', fontSize: '0.85rem', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '4px', color: 'var(--text-primary)' }}
+                    />
+                    <button
+                      onClick={() => handleSaveSubSeriesEdit(sub.subSeriesId)}
+                      style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingSubSeriesId(null)}
+                      style={{ padding: '0.3rem 0.6rem', backgroundColor: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <span style={{ fontWeight: 600, color: sub.active ? 'var(--text-primary)' : 'var(--text-muted)', textDecoration: sub.active ? 'none' : 'line-through' }}>{sub.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => {
+                          setEditingSubSeriesId(sub.subSeriesId);
+                          setEditSubSeriesName(sub.name);
+                        }}
+                        style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleSubSeriesActive(sub)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: sub.active ? 'var(--danger)' : 'var(--accent-primary)',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {sub.active ? 'Disable' : 'Enable'}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>

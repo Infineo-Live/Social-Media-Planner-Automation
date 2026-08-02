@@ -40,4 +40,5 @@ export interface ISettingsRepository {
   addSeries(series: Omit<Series, 'seriesId'>): Promise<Series>;
   addSubSeries(subSeries: Omit<SubSeries, 'subSeriesId'>): Promise<SubSeries>;
   updateSeries(seriesId: number, updates: Partial<Series>): Promise<Series>;
+  updateSubSeries(subSeriesId: number, updates: Partial<SubSeries>): Promise<SubSeries>;
 }

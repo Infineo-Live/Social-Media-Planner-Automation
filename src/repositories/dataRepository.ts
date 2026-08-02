@@ -262,6 +262,12 @@ export class DataRepository
     await googleSheetsClient.updateSheetRow('Series', 0, seriesId, GoogleSheetsMapper.seriesToRow(updated));
     return updated;
   }
+
+  async updateSubSeries(subSeriesId: number, updates: Partial<SubSeries>): Promise<SubSeries> {
+    const updated = await memoryRepository.updateSubSeries(subSeriesId, updates);
+    await googleSheetsClient.updateSheetRow('Sub-Series', 0, subSeriesId, GoogleSheetsMapper.subSeriesToRow(updated));
+    return updated;
+  }
 }
 
 export const dataRepository = new DataRepository();
