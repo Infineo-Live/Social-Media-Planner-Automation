@@ -171,7 +171,7 @@ export const SettingsPage: React.FC = () => {
             >
               {isAddingSeries ? (
                 <>
-                  <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                  <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
                   Adding Series...
                 </>
               ) : (
@@ -287,7 +287,7 @@ export const SettingsPage: React.FC = () => {
             >
               {isAddingSubSeries ? (
                 <>
-                  <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                  <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
                   Adding Sub-Series...
                 </>
               ) : (
