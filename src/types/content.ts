@@ -20,6 +20,7 @@ export interface Series {
   name: string;
   shortCode: string;
   active: boolean;
+  displayOrder?: number;
 }
 
 export interface SubSeries {

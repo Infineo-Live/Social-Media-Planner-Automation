@@ -71,7 +71,11 @@ function doPost(e) {
       
       for (let i = 1; i < data.length; i++) {
         // 1. Try matching by ID column if ID exists in sheet
-        if (idToFind && data[i][idColumn] !== "" && String(data[i][idColumn]) === String(idToFind)) {
+        const cellIdStr = String(data[i][idColumn] || '').toLowerCase().trim();
+        const targetIdStr = String(idToFind || '').toLowerCase().trim();
+        const cellDigits = cellIdStr.replace(/\D/g, '');
+        const targetDigits = targetIdStr.replace(/\D/g, '');
+        if (idToFind && cellIdStr !== "" && (cellIdStr === targetIdStr || (cellDigits && cellDigits === targetDigits))) {
           rowIndex = i + 1;
           break;
         }

@@ -191,18 +191,26 @@ class MemoryRepository
   }
 
   async addSeries(series: Omit<Series, 'seriesId'>): Promise<Series> {
+    const nextId = Math.max(0, ...this.series.map((s) => s.seriesId)) + 1;
+    const maxOrder = Math.max(0, ...this.series.map((s) => s.displayOrder || 0));
     const newSeries: Series = {
       ...series,
-      seriesId: Math.max(0, ...this.series.map((s) => s.seriesId)) + 1,
+      seriesId: nextId,
+      active: series.active !== undefined ? series.active : true,
+      displayOrder: series.displayOrder !== undefined ? series.displayOrder : maxOrder + 1,
     };
     this.series.push(newSeries);
     return newSeries;
   }
 
   async addSubSeries(subSeries: Omit<SubSeries, 'subSeriesId'>): Promise<SubSeries> {
+    const nextId = Math.max(0, ...this.subSeries.map((s) => s.subSeriesId)) + 1;
+    const maxOrder = Math.max(0, ...this.subSeries.map((s) => s.displayOrder || 0));
     const newSubSeries: SubSeries = {
       ...subSeries,
-      subSeriesId: Math.max(0, ...this.subSeries.map((s) => s.subSeriesId)) + 1,
+      subSeriesId: nextId,
+      active: subSeries.active !== undefined ? subSeries.active : true,
+      displayOrder: subSeries.displayOrder !== undefined ? subSeries.displayOrder : maxOrder + 1,
     };
     this.subSeries.push(newSubSeries);
     return newSubSeries;
@@ -211,7 +219,14 @@ class MemoryRepository
   async updateSeries(seriesId: number, updates: Partial<Series>): Promise<Series> {
     const index = this.series.findIndex((s) => s.seriesId === seriesId);
     if (index === -1) throw new Error(`Series ${seriesId} not found.`);
-    const updated = { ...this.series[index], ...updates };
+    const existing = this.series[index];
+    const updated: Series = {
+      ...existing,
+      ...updates,
+      seriesId: existing.seriesId,
+      active: updates.active !== undefined ? updates.active : existing.active,
+      displayOrder: updates.displayOrder !== undefined ? updates.displayOrder : (existing.displayOrder || index + 1),
+    };
     this.series[index] = updated;
     return updated;
   }
@@ -219,7 +234,14 @@ class MemoryRepository
   async updateSubSeries(subSeriesId: number, updates: Partial<SubSeries>): Promise<SubSeries> {
     const index = this.subSeries.findIndex((s) => s.subSeriesId === subSeriesId);
     if (index === -1) throw new Error(`SubSeries ${subSeriesId} not found.`);
-    const updated = { ...this.subSeries[index], ...updates };
+    const existing = this.subSeries[index];
+    const updated: SubSeries = {
+      ...existing,
+      ...updates,
+      subSeriesId: existing.subSeriesId,
+      active: updates.active !== undefined ? updates.active : existing.active,
+      displayOrder: updates.displayOrder !== undefined ? updates.displayOrder : (existing.displayOrder || index + 1),
+    };
     this.subSeries[index] = updated;
     return updated;
   }

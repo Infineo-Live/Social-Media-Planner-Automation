@@ -239,7 +239,13 @@ export class DataRepository
     if (allSeries.some((s) => s.name.toLowerCase() === series.name.toLowerCase())) {
       throw new ValidationError(`Series name '${series.name}' already exists.`);
     }
-    const created = await memoryRepository.addSeries(series);
+    const maxOrder = Math.max(0, ...allSeries.map((s) => s.displayOrder || 0));
+    const toCreate = {
+      ...series,
+      active: series.active !== undefined ? series.active : true,
+      displayOrder: series.displayOrder !== undefined ? series.displayOrder : maxOrder + 1,
+    };
+    const created = await memoryRepository.addSeries(toCreate);
     await googleSheetsClient.appendSheetRow('Series', GoogleSheetsMapper.seriesToRow(created));
     return created;
   }
@@ -252,7 +258,13 @@ export class DataRepository
     if (allSubSeries.some((s) => s.name.toLowerCase() === subSeries.name.toLowerCase())) {
       throw new ValidationError(`Sub-Series name '${subSeries.name}' already exists.`);
     }
-    const created = await memoryRepository.addSubSeries(subSeries);
+    const maxOrder = Math.max(0, ...allSubSeries.map((s) => s.displayOrder || 0));
+    const toCreate = {
+      ...subSeries,
+      active: subSeries.active !== undefined ? subSeries.active : true,
+      displayOrder: subSeries.displayOrder !== undefined ? subSeries.displayOrder : maxOrder + 1,
+    };
+    const created = await memoryRepository.addSubSeries(toCreate);
     await googleSheetsClient.appendSheetRow('Sub-Series', GoogleSheetsMapper.subSeriesToRow(created));
     return created;
   }

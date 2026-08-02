@@ -133,35 +133,56 @@ export class GoogleSheetsMapper {
     };
   }
 
-  // Series Mapper
+  // Series Mapper (Master Series Sheet: [seriesId (SER001), name, shortCode, active, displayOrder])
   static seriesToRow(series: Series): (string | number | boolean)[] {
-    return [series.seriesId, series.name, series.shortCode, series.active];
+    const formattedId = typeof series.seriesId === 'number'
+      ? 'SER' + String(series.seriesId).padStart(3, '0')
+      : String(series.seriesId);
+    return [
+      formattedId,
+      series.name,
+      series.shortCode,
+      series.active,
+      series.displayOrder !== undefined && series.displayOrder !== null ? series.displayOrder : '',
+    ];
   }
 
   static rowToSeries(row: any[], defaultId: number = 1): Series {
-    const parsedId = Number(row[0]);
-    const seriesId = !isNaN(parsedId) && parsedId > 0 ? parsedId : defaultId;
+    const rawIdStr = String(row[0] || '').trim();
+    const digitsOnly = rawIdStr.replace(/\D/g, '');
+    const parsedId = Number(digitsOnly);
+    const seriesId = (!isNaN(parsedId) && parsedId > 0) ? parsedId : defaultId;
+
+    const parsedOrder = Number(row[4]);
+    const displayOrder = (!isNaN(parsedOrder) && row[4] !== '' && row[4] !== undefined && row[4] !== null) ? parsedOrder : defaultId;
+
     return {
       seriesId,
       name: String(row[1] || '').trim(),
       shortCode: String(row[2] || '').trim(),
       active: row[3] !== undefined && row[3] !== '' ? (String(row[3]).toLowerCase() === 'true' || row[3] === true) : true,
+      displayOrder,
     };
   }
 
-  // Sub-Series Mapper (Master Sub-Series Sheet: [subSeriesId, name, active, displayOrder])
+  // Sub-Series Mapper (Master Sub-Series Sheet: [subSeriesId (SUB001), name, active, displayOrder])
   static subSeriesToRow(subSeries: SubSeries): (string | number | boolean)[] {
+    const formattedId = typeof subSeries.subSeriesId === 'number'
+      ? 'SUB' + String(subSeries.subSeriesId).padStart(3, '0')
+      : String(subSeries.subSeriesId);
     return [
-      subSeries.subSeriesId,
+      formattedId,
       subSeries.name,
       subSeries.active,
-      subSeries.displayOrder !== undefined ? subSeries.displayOrder : '',
+      subSeries.displayOrder !== undefined && subSeries.displayOrder !== null ? subSeries.displayOrder : '',
     ];
   }
 
   static rowToSubSeries(row: any[], defaultId: number = 1): SubSeries {
-    const parsedId = Number(row[0]);
-    const subSeriesId = !isNaN(parsedId) && parsedId > 0 ? parsedId : defaultId;
+    const rawIdStr = String(row[0] || '').trim();
+    const digitsOnly = rawIdStr.replace(/\D/g, '');
+    const parsedId = Number(digitsOnly);
+    const subSeriesId = (!isNaN(parsedId) && parsedId > 0) ? parsedId : defaultId;
 
     const row2Lower = String(row[2] || '').toLowerCase();
     const isRow2ActiveBoolean = row[2] === true || row[2] === false || row2Lower === 'true' || row2Lower === 'false';
@@ -172,7 +193,7 @@ export class GoogleSheetsMapper {
         subSeriesId,
         name: String(row[1] || '').trim(),
         active: row2Lower === 'true' || row[2] === true,
-        displayOrder: !isNaN(parsedDisplayOrder) && row[3] !== '' && row[3] !== undefined && row[3] !== null ? parsedDisplayOrder : undefined,
+        displayOrder: (!isNaN(parsedDisplayOrder) && row[3] !== '' && row[3] !== undefined && row[3] !== null) ? parsedDisplayOrder : defaultId,
       };
     }
 
@@ -183,6 +204,7 @@ export class GoogleSheetsMapper {
       seriesId: Number(row[1]),
       name: String(row[2] || '').trim(),
       active: row[3] !== undefined && row[3] !== '' ? (row3Lower === 'true' || row[3] === true) : true,
+      displayOrder: defaultId,
     };
   }
 }

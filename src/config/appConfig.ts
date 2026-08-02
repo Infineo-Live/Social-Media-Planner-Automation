@@ -17,20 +17,20 @@ export interface AppConfig {
 }
 
 export const initialSeries: Series[] = [
-  { seriesId: 1, name: 'Neo Ki Paathshala', shortCode: 'NKPS', active: true },
-  { seriesId: 2, name: 'Ancient Traditions Modern Curiosity', shortCode: 'ATMC', active: true },
-  { seriesId: 3, name: 'Fun Reel', shortCode: 'FUN', active: true },
-  { seriesId: 4, name: 'Ad Reel', shortCode: 'AD', active: true },
-  { seriesId: 5, name: 'Prayer / Shloka', shortCode: 'PS', active: true },
+  { seriesId: 1, name: 'Neo Ki Paathshala', shortCode: 'NKPS', active: true, displayOrder: 1 },
+  { seriesId: 2, name: 'Ancient Traditions Modern Curiosity', shortCode: 'ATMC', active: true, displayOrder: 2 },
+  { seriesId: 3, name: 'Fun Reel', shortCode: 'FUN', active: true, displayOrder: 3 },
+  { seriesId: 4, name: 'Ad Reel', shortCode: 'AD', active: true, displayOrder: 4 },
+  { seriesId: 5, name: 'Prayer / Shloka', shortCode: 'PS', active: true, displayOrder: 5 },
 ];
 
 export const initialSubSeries: SubSeries[] = [
-  { subSeriesId: 1, name: 'Janmashtami', active: true },
-  { subSeriesId: 2, name: 'Ganpati', active: true },
-  { subSeriesId: 3, name: 'Diwali', active: true },
-  { subSeriesId: 4, name: 'Navratri', active: true },
-  { subSeriesId: 5, name: 'Childhood Values', active: true },
-  { subSeriesId: 6, name: 'Relationships', active: true },
+  { subSeriesId: 1, name: 'Janmashtami', active: true, displayOrder: 1 },
+  { subSeriesId: 2, name: 'Ganpati', active: true, displayOrder: 2 },
+  { subSeriesId: 3, name: 'Diwali', active: true, displayOrder: 3 },
+  { subSeriesId: 4, name: 'Navratri', active: true, displayOrder: 4 },
+  { subSeriesId: 5, name: 'Childhood Values', active: true, displayOrder: 5 },
+  { subSeriesId: 6, name: 'Relationships', active: true, displayOrder: 6 },
 ];
 
 export const appConfig: AppConfig = {
