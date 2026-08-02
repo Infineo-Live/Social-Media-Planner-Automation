@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../config/constants';
 import { StatusBadge } from '../components/StatusBadge';
 import {
-  Plus,
   CheckSquare,
   Clock,
   CheckCircle2,
@@ -40,47 +39,6 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {/* Welcome Banner */}
-      <div
-        style={{
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '12px',
-          padding: '1.75rem 2rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            Welcome back, {currentUser.fullName}!
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-            {currentUser.role} Dashboard — Infineo Content Workflow Engine
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button
-            onClick={() => navigate(ROUTES.CONTENT_CREATE)}
-            style={{
-              padding: '0.65rem 1.25rem',
-              backgroundColor: 'var(--accent-primary)',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Plus size={18} />
-            Create Idea
-          </button>
-        </div>
-      </div>
-
       {/* Metrics Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
         <div
