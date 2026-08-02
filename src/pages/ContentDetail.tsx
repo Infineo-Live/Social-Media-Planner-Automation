@@ -92,6 +92,9 @@ export const ContentDetail: React.FC = () => {
 
   const currentSeries = seriesList.find((s) => s.seriesId === item.seriesId);
   const currentSubSeries = subSeriesList.find((s) => s.subSeriesId === item.subSeriesId);
+  const availableSubSeries = subSeriesList.filter(
+    (s) => s.active || s.subSeriesId === item.subSeriesId
+  );
   const assignedUser = users.find((u) => u.userId === item.assignedUserId);
   const creatorUser = users.find((u) => u.userId === item.createdByUserId);
 
@@ -469,12 +472,39 @@ export const ContentDetail: React.FC = () => {
                 <span style={{ color: 'var(--text-muted)' }}>Series:</span>{' '}
                 <strong style={{ color: 'var(--text-primary)' }}>{currentSeries?.name}</strong>
               </div>
-              {currentSubSeries && (
-                <div>
-                  <span style={{ color: 'var(--text-muted)' }}>Sub-Series:</span>{' '}
-                  <strong style={{ color: 'var(--text-primary)' }}>{currentSubSeries.name}</strong>
-                </div>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Sub-Series:</span>{' '}
+                <select
+                  value={item.subSeriesId ?? ''}
+                  onChange={async (e) => {
+                    const val = e.target.value ? Number(e.target.value) : undefined;
+                    try {
+                      const updated = await dataRepository.updateContentItem(item.contentId, { subSeriesId: val });
+                      if (updated) setItem(updated);
+                      showToast('Sub-Series updated successfully!', 'success');
+                      await refreshData();
+                    } catch (err: any) {
+                      showToast(err.message || 'Failed to update sub-series.', 'error');
+                    }
+                  }}
+                  style={{
+                    marginLeft: '0.5rem',
+                    padding: '0.3rem 0.5rem',
+                    backgroundColor: 'var(--bg-main)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '4px',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  <option value="">None (Optional)</option>
+                  {availableSubSeries.map((sub) => (
+                    <option key={sub.subSeriesId} value={sub.subSeriesId}>
+                      {sub.name} {!sub.active ? '(Inactive)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <span style={{ color: 'var(--text-muted)' }}>Real Life Problem:</span>
                 <p style={{ color: 'var(--text-primary)', marginTop: '0.25rem', backgroundColor: 'var(--bg-main)', padding: '0.75rem', borderRadius: '6px' }}>
