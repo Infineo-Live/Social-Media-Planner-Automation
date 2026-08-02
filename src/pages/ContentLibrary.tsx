@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/appContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES, WORKFLOW_STATUSES } from '../config/constants';
 import { StatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
 import { Filter, Plus, Eye } from 'lucide-react';
+import { dataRepository } from '../repositories/dataRepository';
+import { User } from '../types/user';
 
 export const ContentLibrary: React.FC = () => {
   const { contentItems, seriesList, subSeriesList } = useApp();
@@ -13,6 +15,12 @@ export const ContentLibrary: React.FC = () => {
   const [selectedSeries, setSelectedSeries] = useState<number | 'all'>('all');
   const [selectedSubSeries, setSelectedSubSeries] = useState<number | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<string | 'all'>('all');
+  const [selectedAssignedUser, setSelectedAssignedUser] = useState<number | 'all'>('all');
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    dataRepository.getUsers().then(setUsers);
+  }, []);
 
   const visibleSubSeries = selectedSeries === 'all'
     ? subSeriesList
@@ -22,7 +30,8 @@ export const ContentLibrary: React.FC = () => {
     const matchesSeries = selectedSeries === 'all' || item.seriesId === Number(selectedSeries);
     const matchesSubSeries = selectedSubSeries === 'all' || item.subSeriesId === Number(selectedSubSeries);
     const matchesStatus = selectedStatus === 'all' || item.currentStatus === selectedStatus;
-    return matchesSeries && matchesSubSeries && matchesStatus;
+    const matchesAssignedUser = selectedAssignedUser === 'all' || item.assignedUserId === selectedAssignedUser;
+    return matchesSeries && matchesSubSeries && matchesStatus && matchesAssignedUser;
   });
 
   return (
@@ -130,6 +139,26 @@ export const ContentLibrary: React.FC = () => {
             {WORKFLOW_STATUSES.map((status) => (
               <option key={status} value={status}>
                 {status}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedAssignedUser}
+            onChange={(e) => setSelectedAssignedUser(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            style={{
+              padding: '0.6rem 0.75rem',
+              backgroundColor: 'var(--bg-main)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '6px',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+            }}
+          >
+            <option value="all">All Assigned Users</option>
+            {users.map((u) => (
+              <option key={u.userId} value={u.userId}>
+                {u.fullName}
               </option>
             ))}
           </select>
