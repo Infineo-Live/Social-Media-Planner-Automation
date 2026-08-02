@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/authContext';
 import { useApp } from '../context/appContext';
@@ -11,12 +11,18 @@ export const CreateContent: React.FC = () => {
   const { seriesList, subSeriesList, refreshData } = useApp();
   const navigate = useNavigate();
 
-  const [seriesId, setSeriesId] = useState<number>(seriesList[0]?.seriesId || 1);
+  const [seriesId, setSeriesId] = useState<number>(() => seriesList[0]?.seriesId || 0);
   const [subSeriesId, setSubSeriesId] = useState<number | undefined>(undefined);
   const [workingTitle, setWorkingTitle] = useState('');
   const [realLifeProblem, setRealLifeProblem] = useState('');
   const [mythologyStory, setMythologyStory] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (seriesList.length > 0 && (!seriesId || !seriesList.some((s) => s.seriesId === seriesId))) {
+      setSeriesId(seriesList[0].seriesId);
+    }
+  }, [seriesList, seriesId]);
 
   if (!currentUser) return null;
 
