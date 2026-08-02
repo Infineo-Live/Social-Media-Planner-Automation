@@ -3,10 +3,12 @@ import { useAuth } from '../auth/authContext';
 import { dataRepository } from '../repositories/dataRepository';
 import { User, UserRole } from '../types/user';
 import { Users, Plus, Edit3, UserCheck, UserX } from 'lucide-react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export const UsersManagement: React.FC = () => {
   const { currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
@@ -29,10 +31,16 @@ export const UsersManagement: React.FC = () => {
   };
 
   useEffect(() => {
-    loadUsers();
+    const initialLoad = async () => {
+      await loadUsers();
+      setLoading(false);
+    };
+    initialLoad();
   }, []);
 
   if (!currentUser || currentUser.role !== 'Admin') return <div>Access Denied.</div>;
+
+  if (loading) return <LoadingSpinner message="Loading users..." />;
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
