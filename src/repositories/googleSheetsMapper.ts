@@ -73,9 +73,14 @@ export class GoogleSheetsMapper {
     ];
   }
 
-  static rowToContent(row: any[], seriesIdMap: (name: string) => number, subSeriesIdMap: (name: string) => number | undefined): ContentItem {
+  static rowToContent(row: any[], seriesIdMap: (name: string) => number, subSeriesIdMap: (name: string) => number | undefined, defaultId: number = 101): ContentItem {
+    const rawIdStr = String(row[0] || '').trim();
+    const digitsOnly = rawIdStr.replace(/\D/g, '');
+    const parsedId = Number(digitsOnly || rawIdStr);
+    const contentId = (!isNaN(parsedId) && parsedId > 0) ? parsedId : defaultId;
+
     return {
-      contentId: Number(row[0]),
+      contentId,
       seriesId: seriesIdMap(String(row[1] || '')),
       subSeriesId: row[2] ? subSeriesIdMap(String(row[2])) : undefined,
       title: String(row[3] || ''),

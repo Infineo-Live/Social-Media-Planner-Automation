@@ -80,7 +80,9 @@ export class DataRepository
       const subSeries = await this.getSubSeries();
       const seriesIdMap = (name: string) => series.find(s => s.name === name)?.seriesId || 0;
       const subSeriesIdMap = (name: string) => subSeries.find(s => s.name === name)?.subSeriesId;
-      return rows.map(r => GoogleSheetsMapper.rowToContent(r, seriesIdMap, subSeriesIdMap));
+      const items = rows.map(r => GoogleSheetsMapper.rowToContent(r, seriesIdMap, subSeriesIdMap));
+      memoryRepository.setContentItems(items);
+      return items;
     }
     return memoryRepository.getContentItems();
   }
@@ -111,9 +113,13 @@ export class DataRepository
   }
 
   async updateContentItem(contentId: number, updates: Partial<ContentItem>): Promise<ContentItem> {
+    const existingItem = await this.getContentItemById(contentId);
+    if (!existingItem) {
+      throw new Error(`ContentItem with ID ${contentId} not found.`);
+    }
+
     if (updates.episodeNumber !== undefined && updates.episodeNumber !== null) {
-      const existingItem = await this.getContentItemById(contentId);
-      const targetSeriesId = updates.seriesId || existingItem?.seriesId;
+      const targetSeriesId = updates.seriesId || existingItem.seriesId;
       if (targetSeriesId) {
         const allContent = await this.getContentItems();
         const duplicate = allContent.find(

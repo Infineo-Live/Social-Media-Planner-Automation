@@ -285,6 +285,10 @@ class MemoryRepository
     return { ...this.config };
   }
 
+  setContentItems(content: ContentItem[]): void {
+    this.content = [...content];
+  }
+
   setSeries(series: Series[]): void {
     this.series = [...series];
   }
