@@ -519,12 +519,15 @@ export const ContentDetail: React.FC = () => {
                   onChange={async (e) => {
                     if (isPlannedDateLocked) return;
                     const val = e.target.value || undefined;
+                    const prevDate = item.plannedUploadDate;
+                    setItem((prev) => (prev ? { ...prev, plannedUploadDate: val } : prev));
                     try {
                       const updated = await dataRepository.updateContentItem(item.contentId, { plannedUploadDate: val });
                       if (updated) setItem(updated);
                       showToast('Planned upload date updated!', 'success');
                       await refreshData();
                     } catch (err: any) {
+                      setItem((prev) => (prev ? { ...prev, plannedUploadDate: prevDate } : prev));
                       showToast(err.message || 'Failed to update planned upload date.', 'error');
                     }
                   }}
