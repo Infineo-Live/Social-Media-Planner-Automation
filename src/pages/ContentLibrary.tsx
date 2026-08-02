@@ -4,26 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES, WORKFLOW_STATUSES } from '../config/constants';
 import { StatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
-import { Search, Filter, Plus, Eye } from 'lucide-react';
+import { Filter, Plus, Eye } from 'lucide-react';
 
 export const ContentLibrary: React.FC = () => {
   const { contentItems, seriesList } = useApp();
   const navigate = useNavigate();
 
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedSeries, setSelectedSeries] = useState<number | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<string | 'all'>('all');
 
   const filteredItems = contentItems.filter((item) => {
-    const matchesSearch =
-      !searchTerm ||
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.mythologyStory && item.mythologyStory.toLowerCase().includes(searchTerm.toLowerCase()));
-
     const matchesSeries = selectedSeries === 'all' || item.seriesId === Number(selectedSeries);
     const matchesStatus = selectedStatus === 'all' || item.currentStatus === selectedStatus;
-
-    return matchesSearch && matchesSeries && matchesStatus;
+    return matchesSeries && matchesStatus;
   });
 
   return (
@@ -70,35 +63,6 @@ export const ContentLibrary: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
-          <Search
-            size={18}
-            style={{
-              position: 'absolute',
-              left: '0.75rem',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--text-muted)',
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search title, problem statement, or mythology story..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.6rem 0.75rem 0.6rem 2.5rem',
-              backgroundColor: 'var(--bg-main)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-              outline: 'none',
-            }}
-          />
-        </div>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Filter size={16} style={{ color: 'var(--text-muted)' }} />
           <select
