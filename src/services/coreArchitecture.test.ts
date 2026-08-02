@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { memoryRepository } from '../repositories/memoryRepository';
 import { appConfig } from '../config/appConfig';
 import { WORKFLOW_STATUSES, PLATFORMS } from '../config/constants';
-import { formatDate, formatDateTime } from '../utils/dateUtils';
+import { formatDate, formatDateTime, normalizeDateOnly } from '../utils/dateUtils';
 import { isValidUrl, isValidEmail } from '../utils/validationUtils';
 
 describe('Phase 2 Core Architecture', () => {
@@ -30,5 +30,8 @@ describe('Phase 2 Core Architecture', () => {
     expect(isValidUrl('invalid-url')).toBe(false);
     expect(isValidEmail('user@infineo.com')).toBe(true);
     expect(formatDate('2026-07-30T12:00:00Z')).toContain('2026');
+    expect(normalizeDateOnly('2026-08-24')).toBe('2026-08-24');
+    expect(normalizeDateOnly('2026-08-23T18:30:00.000Z')).toBe(normalizeDateOnly(new Date('2026-08-23T18:30:00.000Z').toISOString()));
+    expect(normalizeDateOnly(undefined)).toBeUndefined();
   });
 });

@@ -2,6 +2,7 @@ import { User } from '../types/user';
 import { ContentItem, Series, SubSeries } from '../types/content';
 import { ActivityLogItem } from '../types/activity';
 import { AppNotification } from '../types/notification';
+import { normalizeDateOnly } from '../utils/dateUtils';
 
 export class GoogleSheetsMapper {
   // Map User domain object <-> Sheet row array
@@ -80,7 +81,7 @@ export class GoogleSheetsMapper {
       title: String(row[3] || ''),
       mythologyStory: String(row[4] || '') || undefined,
       episodeNumber: row[5] !== '' && row[5] !== undefined && row[5] !== null ? Number(row[5]) : undefined,
-      plannedUploadDate: String(row[6] || '') || undefined,
+      plannedUploadDate: normalizeDateOnly(row[6] ? String(row[6]) : undefined),
       currentStatus: row[7] as any,
       assignedUserId: row[8] ? Number(row[8]) : undefined,
       createdByUserId: Number(row[9]),

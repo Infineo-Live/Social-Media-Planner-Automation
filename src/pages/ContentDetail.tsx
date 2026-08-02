@@ -12,7 +12,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../context/ToastContext';
 import { ROUTES } from '../config/constants';
-import { formatDate, formatDateTime } from '../utils/dateUtils';
+import { formatDate, formatDateTime, normalizeDateOnly } from '../utils/dateUtils';
 import {
   ArrowLeft,
   CheckCircle,
@@ -513,7 +513,7 @@ export const ContentDetail: React.FC = () => {
                 <span style={{ color: 'var(--text-muted)' }}>Planned Upload Date:</span>
                 <input
                   type="date"
-                  value={item.plannedUploadDate ? item.plannedUploadDate.split('T')[0] : ''}
+                  value={normalizeDateOnly(item.plannedUploadDate) || ''}
                   disabled={isPlannedDateLocked}
                   readOnly={isPlannedDateLocked}
                   onChange={async (e) => {

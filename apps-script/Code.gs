@@ -33,7 +33,7 @@ function doGet(e) {
     const sheet = spreadsheet.getSheetByName(sheetName);
     if (!sheet) throw new Error("Sheet not found: " + sheetName);
     
-    const data = sheet.getDataRange().getValues();
+    const data = sheet.getDataRange().getDisplayValues();
     // Assuming row 0 is headers, we return rows 1 to end.
     const rows = data.length > 1 ? data.slice(1) : [];
     
