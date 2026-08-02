@@ -21,6 +21,7 @@ import {
   Save,
   Clock,
   UserCheck,
+  Loader2,
 } from 'lucide-react';
 
 export const ContentDetail: React.FC = () => {
@@ -34,6 +35,7 @@ export const ContentDetail: React.FC = () => {
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isSavingDate, setIsSavingDate] = useState<boolean>(false);
   const [rejectionReason, setRejectionReason] = useState<string>('');
   const [showRejectModal, setShowRejectModal] = useState<boolean>(false);
   const [canvaInput, setCanvaInput] = useState<string>('');
@@ -510,16 +512,24 @@ export const ContentDetail: React.FC = () => {
                 </select>
               </div>
               <div>
-                <span style={{ color: 'var(--text-muted)' }}>Planned Upload Date:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Planned Upload Date:</span>
+                  {isSavingDate && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Saving...
+                    </span>
+                  )}
+                </div>
                 <input
                   type="date"
                   value={normalizeDateOnly(item.plannedUploadDate) || ''}
-                  disabled={isPlannedDateLocked}
-                  readOnly={isPlannedDateLocked}
+                  disabled={isPlannedDateLocked || isSavingDate}
+                  readOnly={isPlannedDateLocked || isSavingDate}
                   onChange={async (e) => {
-                    if (isPlannedDateLocked) return;
+                    if (isPlannedDateLocked || isSavingDate) return;
                     const val = e.target.value || undefined;
                     const prevDate = item.plannedUploadDate;
+                    setIsSavingDate(true);
                     setItem((prev) => (prev ? { ...prev, plannedUploadDate: val } : prev));
                     try {
                       const updated = await dataRepository.updateContentItem(item.contentId, { plannedUploadDate: val });
@@ -529,6 +539,8 @@ export const ContentDetail: React.FC = () => {
                     } catch (err: any) {
                       setItem((prev) => (prev ? { ...prev, plannedUploadDate: prevDate } : prev));
                       showToast(err.message || 'Failed to update planned upload date.', 'error');
+                    } finally {
+                      setIsSavingDate(false);
                     }
                   }}
                   style={{
@@ -538,10 +550,10 @@ export const ContentDetail: React.FC = () => {
                     backgroundColor: 'var(--bg-main)',
                     border: '1px solid var(--border-color)',
                     borderRadius: '6px',
-                    color: isPlannedDateLocked ? 'var(--text-muted)' : 'var(--text-primary)',
+                    color: isPlannedDateLocked || isSavingDate ? 'var(--text-muted)' : 'var(--text-primary)',
                     fontSize: '0.875rem',
-                    opacity: isPlannedDateLocked ? 0.7 : 1,
-                    cursor: isPlannedDateLocked ? 'not-allowed' : 'pointer',
+                    opacity: isPlannedDateLocked || isSavingDate ? 0.7 : 1,
+                    cursor: isPlannedDateLocked || isSavingDate ? 'not-allowed' : 'pointer',
                   }}
                 />
               </div>
