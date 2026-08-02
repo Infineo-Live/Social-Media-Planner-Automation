@@ -30,6 +30,7 @@ export const ROUTES = {
   CONTENT_LIBRARY: '/content',
   CONTENT_CREATE: '/content/new',
   CONTENT_DETAIL: '/content/:id',
+  CONTENT_CALENDAR: '/calendar',
   NOTIFICATIONS: '/notifications',
   TEAM_OVERVIEW: '/team',
   USERS: '/users',

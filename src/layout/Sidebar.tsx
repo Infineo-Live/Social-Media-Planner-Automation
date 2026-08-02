@@ -8,6 +8,7 @@ import {
   FolderPlus,
   CheckCircle2,
   Library,
+  CalendarDays,
   Users,
   Settings,
   User,
@@ -72,6 +73,11 @@ export const Sidebar: React.FC = () => {
         <NavLink to={ROUTES.CONTENT_LIBRARY} style={linkStyle}>
           <Library size={18} />
           Content Library
+        </NavLink>
+
+        <NavLink to={ROUTES.CONTENT_CALENDAR} style={linkStyle}>
+          <CalendarDays size={18} />
+          Content Calendar
         </NavLink>
 
         {currentUser.role === 'Admin' && (

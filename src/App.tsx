@@ -21,6 +21,7 @@ import { TeamOverview } from './pages/TeamOverview';
 import { UsersManagement } from './pages/UsersManagement';
 import { SettingsPage } from './pages/SettingsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { ContentCalendar } from './pages/ContentCalendar';
 
 export function App() {
   return (
@@ -104,6 +105,17 @@ export function App() {
                 <ProtectedRoute>
                   <MainLayout>
                     <ContentDetail />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.CONTENT_CALENDAR}
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ContentCalendar />
                   </MainLayout>
                 </ProtectedRoute>
               }
