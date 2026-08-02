@@ -20,7 +20,7 @@ export const CreateContent: React.FC = () => {
 
   if (!currentUser) return null;
 
-  const availableSubSeries = subSeriesList.filter((s) => s.seriesId === Number(seriesId));
+  const availableSubSeries = subSeriesList.filter((s) => s.seriesId === Number(seriesId) && s.active);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
