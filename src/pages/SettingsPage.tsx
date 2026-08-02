@@ -13,7 +13,6 @@ export const SettingsPage: React.FC = () => {
   const [newSeriesName, setNewSeriesName] = useState('');
   const [newSeriesCode, setNewSeriesCode] = useState('');
   const [newSubSeriesName, setNewSubSeriesName] = useState('');
-  const [targetSeriesId, setTargetSeriesId] = useState<number>(seriesList[0]?.seriesId || 1);
 
   if (!currentUser || currentUser.role !== 'Admin') return <div>Access Denied.</div>;
 
@@ -38,7 +37,6 @@ export const SettingsPage: React.FC = () => {
     e.preventDefault();
     try {
       await dataRepository.addSubSeries({
-        seriesId: Number(targetSeriesId),
         name: newSubSeriesName.trim(),
         active: true,
       });
@@ -111,17 +109,6 @@ export const SettingsPage: React.FC = () => {
           </h2>
 
           <form onSubmit={handleAddSubSeries} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            <select
-              value={targetSeriesId}
-              onChange={(e) => setTargetSeriesId(Number(e.target.value))}
-              style={{ width: '100%', padding: '0.65rem', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-primary)' }}
-            >
-              {seriesList.map((s) => (
-                <option key={s.seriesId} value={s.seriesId}>
-                  [{s.shortCode}] {s.name}
-                </option>
-              ))}
-            </select>
             <input
               type="text"
               required
@@ -140,15 +127,14 @@ export const SettingsPage: React.FC = () => {
           </form>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {subSeriesList.map((sub) => {
-              const parent = seriesList.find((s) => s.seriesId === sub.seriesId);
-              return (
-                <div key={sub.subSeriesId} style={{ backgroundColor: 'var(--bg-main)', padding: '0.6rem 0.85rem', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{sub.name}</span>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{parent?.shortCode}</span>
-                </div>
-              );
-            })}
+            {subSeriesList.map((sub) => (
+              <div key={sub.subSeriesId} style={{ backgroundColor: 'var(--bg-main)', padding: '0.6rem 0.85rem', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{sub.name}</span>
+                <span style={{ color: sub.active ? 'var(--accent-primary)' : 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600 }}>
+                  {sub.active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

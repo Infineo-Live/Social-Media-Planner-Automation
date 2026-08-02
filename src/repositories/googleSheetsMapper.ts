@@ -1,5 +1,5 @@
 import { User } from '../types/user';
-import { ContentItem } from '../types/content';
+import { ContentItem, Series, SubSeries } from '../types/content';
 import { ActivityLogItem } from '../types/activity';
 import { AppNotification } from '../types/notification';
 
@@ -130,6 +130,50 @@ export class GoogleSheetsMapper {
       previousStatus: String(row[5] || '') || undefined,
       newStatus: String(row[6] || '') || undefined,
       notes: String(row[7] || '') || undefined,
+    };
+  }
+
+  // Series Mapper
+  static seriesToRow(series: Series): (string | number | boolean)[] {
+    return [series.seriesId, series.name, series.shortCode, series.active];
+  }
+
+  static rowToSeries(row: any[], defaultId: number = 1): Series {
+    const parsedId = Number(row[0]);
+    const seriesId = !isNaN(parsedId) && parsedId > 0 ? parsedId : defaultId;
+    return {
+      seriesId,
+      name: String(row[1] || '').trim(),
+      shortCode: String(row[2] || '').trim(),
+      active: row[3] !== undefined && row[3] !== '' ? (String(row[3]).toLowerCase() === 'true' || row[3] === true) : true,
+    };
+  }
+
+  // Sub-Series Mapper (Master Sub-Series Sheet: [subSeriesId, name, active])
+  static subSeriesToRow(subSeries: SubSeries): (string | number | boolean)[] {
+    return [subSeries.subSeriesId, subSeries.name, subSeries.active];
+  }
+
+  static rowToSubSeries(row: any[], defaultId: number = 1): SubSeries {
+    const parsedId = Number(row[0]);
+    const subSeriesId = !isNaN(parsedId) && parsedId > 0 ? parsedId : defaultId;
+    
+    // Support legacy 4-column format [subSeriesId, seriesId, name, active]
+    const isLegacy = row.length >= 4 || typeof row[1] === 'number' || (!isNaN(Number(row[1])) && row[1] !== '' && row[1] !== true && row[1] !== false && String(row[1]).toLowerCase() !== 'true' && String(row[1]).toLowerCase() !== 'false' && row.length > 3);
+
+    if (isLegacy && row[2] !== undefined) {
+      return {
+        subSeriesId,
+        seriesId: Number(row[1]),
+        name: String(row[2] || '').trim(),
+        active: row[3] !== undefined && row[3] !== '' ? (String(row[3]).toLowerCase() === 'true' || row[3] === true) : true,
+      };
+    }
+
+    return {
+      subSeriesId,
+      name: String(row[1] || '').trim(),
+      active: row[2] !== undefined && row[2] !== '' ? (String(row[2]).toLowerCase() === 'true' || row[2] === true) : true,
     };
   }
 }

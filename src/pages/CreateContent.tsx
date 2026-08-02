@@ -20,7 +20,7 @@ export const CreateContent: React.FC = () => {
 
   if (!currentUser) return null;
 
-  const availableSubSeries = subSeriesList.filter((s) => s.seriesId === Number(seriesId) && s.active);
+  const availableSubSeries = subSeriesList.filter((s) => s.active);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +124,6 @@ export const CreateContent: React.FC = () => {
               value={seriesId}
               onChange={(e) => {
                 setSeriesId(Number(e.target.value));
-                setSubSeriesId(undefined);
               }}
               style={{
                 width: '100%',

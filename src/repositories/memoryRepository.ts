@@ -177,11 +177,17 @@ class MemoryRepository
     return [...this.series];
   }
 
-  async getSubSeries(seriesId?: number): Promise<SubSeries[]> {
-    if (seriesId) {
-      return this.subSeries.filter((s) => s.seriesId === seriesId);
+  async getSubSeries(_seriesId?: number): Promise<SubSeries[]> {
+    const unique: SubSeries[] = [];
+    const seen = new Set<string>();
+    for (const sub of this.subSeries) {
+      const key = sub.name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(sub);
+      }
     }
-    return [...this.subSeries];
+    return unique;
   }
 
   async addSeries(series: Omit<Series, 'seriesId'>): Promise<Series> {

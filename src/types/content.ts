@@ -24,7 +24,7 @@ export interface Series {
 
 export interface SubSeries {
   subSeriesId: number;
-  seriesId: number;
+  seriesId?: number;
   name: string;
   active: boolean;
 }

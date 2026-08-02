@@ -192,11 +192,35 @@ export class DataRepository
   }
 
   async getSeries(): Promise<Series[]> {
+    const rows = await googleSheetsClient.fetchSheetData('Series');
+    if (rows) {
+      const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
+      if (validRows.length > 0) {
+        return validRows.map((r, idx) => GoogleSheetsMapper.rowToSeries(r, idx + 1));
+      }
+    }
     return memoryRepository.getSeries();
   }
 
-  async getSubSeries(seriesId?: number): Promise<SubSeries[]> {
-    return memoryRepository.getSubSeries(seriesId);
+  async getSubSeries(_seriesId?: number): Promise<SubSeries[]> {
+    const rows = await googleSheetsClient.fetchSheetData('Sub-Series');
+    if (rows) {
+      const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
+      if (validRows.length > 0) {
+        const items = validRows.map((r, idx) => GoogleSheetsMapper.rowToSubSeries(r, idx + 1));
+        const uniqueItems: SubSeries[] = [];
+        const seenNames = new Set<string>();
+        for (const item of items) {
+          const lower = item.name.toLowerCase();
+          if (!seenNames.has(lower)) {
+            seenNames.add(lower);
+            uniqueItems.push(item);
+          }
+        }
+        return uniqueItems;
+      }
+    }
+    return memoryRepository.getSubSeries();
   }
 
   async addSeries(series: Omit<Series, 'seriesId'>): Promise<Series> {
@@ -207,18 +231,28 @@ export class DataRepository
     if (allSeries.some((s) => s.name.toLowerCase() === series.name.toLowerCase())) {
       throw new ValidationError(`Series name '${series.name}' already exists.`);
     }
-    return memoryRepository.addSeries(series);
+    const created = await memoryRepository.addSeries(series);
+    await googleSheetsClient.appendSheetRow('Series', GoogleSheetsMapper.seriesToRow(created));
+    return created;
   }
 
   async addSubSeries(subSeries: Omit<SubSeries, 'subSeriesId'>): Promise<SubSeries> {
     if (!isNonEmptyString(subSeries.name)) {
       throw new ValidationError('Sub-Series name is required.');
     }
-    return memoryRepository.addSubSeries(subSeries);
+    const allSubSeries = await this.getSubSeries();
+    if (allSubSeries.some((s) => s.name.toLowerCase() === subSeries.name.toLowerCase())) {
+      throw new ValidationError(`Sub-Series name '${subSeries.name}' already exists.`);
+    }
+    const created = await memoryRepository.addSubSeries(subSeries);
+    await googleSheetsClient.appendSheetRow('Sub-Series', GoogleSheetsMapper.subSeriesToRow(created));
+    return created;
   }
 
   async updateSeries(seriesId: number, updates: Partial<Series>): Promise<Series> {
-    return memoryRepository.updateSeries(seriesId, updates);
+    const updated = await memoryRepository.updateSeries(seriesId, updates);
+    await googleSheetsClient.updateSheetRow('Series', 0, seriesId, GoogleSheetsMapper.seriesToRow(updated));
+    return updated;
   }
 }
 
