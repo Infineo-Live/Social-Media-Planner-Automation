@@ -90,6 +90,13 @@ function doPost(e) {
             rowIndex = i + 1;
             break;
           }
+        } else if (sheetName === 'Series' || sheetName === 'Sub-Series') {
+          const nameInSheet = String(data[i][1] || '').toLowerCase().trim();
+          const targetName = String(newRow[1] || '').toLowerCase().trim();
+          if (targetName && nameInSheet === targetName) {
+            rowIndex = i + 1;
+            break;
+          }
         }
       }
       
