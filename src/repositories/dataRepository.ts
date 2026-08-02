@@ -197,7 +197,18 @@ export class DataRepository
       if (rows) {
         const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
         if (validRows.length > 0) {
-          return validRows.map((r, idx) => GoogleSheetsMapper.rowToSeries(r, idx + 1));
+          const items = validRows.map((r, idx) => GoogleSheetsMapper.rowToSeries(r, idx + 1));
+          const seenIds = new Set<number>();
+          const uniqueSeries: Series[] = items.map((item, idx) => {
+            let id = item.seriesId;
+            if (seenIds.has(id)) {
+              id = Math.max(idx + 1, (Math.max(0, ...Array.from(seenIds)) || 0) + 1);
+            }
+            seenIds.add(id);
+            return { ...item, seriesId: id };
+          });
+          memoryRepository.setSeries(uniqueSeries);
+          return uniqueSeries;
         }
       }
     } catch {
@@ -213,15 +224,23 @@ export class DataRepository
         const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
         if (validRows.length > 0) {
           const items = validRows.map((r, idx) => GoogleSheetsMapper.rowToSubSeries(r, idx + 1));
-          const uniqueItems: SubSeries[] = [];
+          const seenIds = new Set<number>();
           const seenNames = new Set<string>();
-          for (const item of items) {
+          const uniqueItems: SubSeries[] = [];
+          for (let idx = 0; idx < items.length; idx++) {
+            const item = items[idx];
             const lower = item.name.toLowerCase();
             if (!seenNames.has(lower)) {
               seenNames.add(lower);
-              uniqueItems.push(item);
+              let id = item.subSeriesId;
+              if (seenIds.has(id)) {
+                id = Math.max(idx + 1, (Math.max(0, ...Array.from(seenIds)) || 0) + 1);
+              }
+              seenIds.add(id);
+              uniqueItems.push({ ...item, subSeriesId: id });
             }
           }
+          memoryRepository.setSubSeries(uniqueItems);
           return uniqueItems;
         }
       }
@@ -239,15 +258,18 @@ export class DataRepository
     if (allSeries.some((s) => s.name.toLowerCase() === series.name.toLowerCase())) {
       throw new ValidationError(`Series name '${series.name}' already exists.`);
     }
+    const maxId = Math.max(0, ...allSeries.map((s) => Number(s.seriesId) || 0));
+    const nextSeriesId = maxId + 1;
     const maxOrder = Math.max(0, ...allSeries.map((s) => s.displayOrder || 0));
-    const toCreate = {
+    const toCreate: Series = {
       ...series,
+      seriesId: nextSeriesId,
       active: series.active !== undefined ? series.active : true,
       displayOrder: series.displayOrder !== undefined ? series.displayOrder : maxOrder + 1,
     };
-    const created = await memoryRepository.addSeries(toCreate);
-    await googleSheetsClient.appendSheetRow('Series', GoogleSheetsMapper.seriesToRow(created));
-    return created;
+    await memoryRepository.addSeriesWithId(toCreate);
+    await googleSheetsClient.appendSheetRow('Series', GoogleSheetsMapper.seriesToRow(toCreate));
+    return toCreate;
   }
 
   async addSubSeries(subSeries: Omit<SubSeries, 'subSeriesId'>): Promise<SubSeries> {
@@ -258,15 +280,18 @@ export class DataRepository
     if (allSubSeries.some((s) => s.name.toLowerCase() === subSeries.name.toLowerCase())) {
       throw new ValidationError(`Sub-Series name '${subSeries.name}' already exists.`);
     }
+    const maxId = Math.max(0, ...allSubSeries.map((s) => Number(s.subSeriesId) || 0));
+    const nextSubSeriesId = maxId + 1;
     const maxOrder = Math.max(0, ...allSubSeries.map((s) => s.displayOrder || 0));
-    const toCreate = {
+    const toCreate: SubSeries = {
       ...subSeries,
+      subSeriesId: nextSubSeriesId,
       active: subSeries.active !== undefined ? subSeries.active : true,
       displayOrder: subSeries.displayOrder !== undefined ? subSeries.displayOrder : maxOrder + 1,
     };
-    const created = await memoryRepository.addSubSeries(toCreate);
-    await googleSheetsClient.appendSheetRow('Sub-Series', GoogleSheetsMapper.subSeriesToRow(created));
-    return created;
+    await memoryRepository.addSubSeriesWithId(toCreate);
+    await googleSheetsClient.appendSheetRow('Sub-Series', GoogleSheetsMapper.subSeriesToRow(toCreate));
+    return toCreate;
   }
 
   async updateSeries(seriesId: number, updates: Partial<Series>): Promise<Series> {

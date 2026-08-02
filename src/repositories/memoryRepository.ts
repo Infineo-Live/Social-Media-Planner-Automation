@@ -173,6 +173,14 @@ class MemoryRepository
     return { ...this.config };
   }
 
+  setSeries(series: Series[]): void {
+    this.series = [...series];
+  }
+
+  setSubSeries(subSeries: SubSeries[]): void {
+    this.subSeries = [...subSeries];
+  }
+
   async getSeries(): Promise<Series[]> {
     return [...this.series];
   }
@@ -190,8 +198,29 @@ class MemoryRepository
     return unique;
   }
 
+  async addSeriesWithId(series: Series): Promise<Series> {
+    const index = this.series.findIndex((s) => s.seriesId === series.seriesId);
+    if (index >= 0) {
+      this.series[index] = series;
+    } else {
+      this.series.push(series);
+    }
+    return series;
+  }
+
+  async addSubSeriesWithId(subSeries: SubSeries): Promise<SubSeries> {
+    const index = this.subSeries.findIndex((s) => s.subSeriesId === subSeries.subSeriesId);
+    if (index >= 0) {
+      this.subSeries[index] = subSeries;
+    } else {
+      this.subSeries.push(subSeries);
+    }
+    return subSeries;
+  }
+
   async addSeries(series: Omit<Series, 'seriesId'>): Promise<Series> {
-    const nextId = Math.max(0, ...this.series.map((s) => s.seriesId)) + 1;
+    const maxId = Math.max(0, ...this.series.map((s) => Number(s.seriesId) || 0));
+    const nextId = maxId + 1;
     const maxOrder = Math.max(0, ...this.series.map((s) => s.displayOrder || 0));
     const newSeries: Series = {
       ...series,
@@ -204,7 +233,8 @@ class MemoryRepository
   }
 
   async addSubSeries(subSeries: Omit<SubSeries, 'subSeriesId'>): Promise<SubSeries> {
-    const nextId = Math.max(0, ...this.subSeries.map((s) => s.subSeriesId)) + 1;
+    const maxId = Math.max(0, ...this.subSeries.map((s) => Number(s.subSeriesId) || 0));
+    const nextId = maxId + 1;
     const maxOrder = Math.max(0, ...this.subSeries.map((s) => s.displayOrder || 0));
     const newSubSeries: SubSeries = {
       ...subSeries,
