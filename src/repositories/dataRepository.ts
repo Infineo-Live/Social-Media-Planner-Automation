@@ -206,7 +206,7 @@ export class DataRepository
     return memoryRepository.getSeries();
   }
 
-  async getSubSeries(_seriesId?: number): Promise<SubSeries[]> {
+  async getSubSeries(): Promise<SubSeries[]> {
     try {
       const rows = await googleSheetsClient.fetchSheetData('Sub-Series');
       if (rows) {

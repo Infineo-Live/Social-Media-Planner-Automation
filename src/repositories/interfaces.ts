@@ -36,7 +36,7 @@ export interface ISettingsRepository {
   getConfig(): Promise<AppConfig>;
   updateConfig(updates: Partial<AppConfig>): Promise<AppConfig>;
   getSeries(): Promise<Series[]>;
-  getSubSeries(seriesId?: number): Promise<SubSeries[]>;
+  getSubSeries(): Promise<SubSeries[]>;
   addSeries(series: Omit<Series, 'seriesId'>): Promise<Series>;
   addSubSeries(subSeries: Omit<SubSeries, 'subSeriesId'>): Promise<SubSeries>;
   updateSeries(seriesId: number, updates: Partial<Series>): Promise<Series>;

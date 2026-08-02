@@ -177,7 +177,7 @@ class MemoryRepository
     return [...this.series];
   }
 
-  async getSubSeries(_seriesId?: number): Promise<SubSeries[]> {
+  async getSubSeries(): Promise<SubSeries[]> {
     const unique: SubSeries[] = [];
     const seen = new Set<string>();
     for (const sub of this.subSeries) {

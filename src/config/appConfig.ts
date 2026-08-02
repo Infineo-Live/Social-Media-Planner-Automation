@@ -25,12 +25,12 @@ export const initialSeries: Series[] = [
 ];
 
 export const initialSubSeries: SubSeries[] = [
-  { subSeriesId: 1, seriesId: 2, name: 'Janmashtami', active: true },
-  { subSeriesId: 2, seriesId: 2, name: 'Ganpati', active: true },
-  { subSeriesId: 3, seriesId: 2, name: 'Diwali', active: true },
-  { subSeriesId: 4, seriesId: 2, name: 'Navratri', active: true },
-  { subSeriesId: 5, seriesId: 1, name: 'Childhood Values', active: true },
-  { subSeriesId: 6, seriesId: 1, name: 'Relationships', active: true },
+  { subSeriesId: 1, name: 'Janmashtami', active: true },
+  { subSeriesId: 2, name: 'Ganpati', active: true },
+  { subSeriesId: 3, name: 'Diwali', active: true },
+  { subSeriesId: 4, name: 'Navratri', active: true },
+  { subSeriesId: 5, name: 'Childhood Values', active: true },
+  { subSeriesId: 6, name: 'Relationships', active: true },
 ];
 
 export const appConfig: AppConfig = {
