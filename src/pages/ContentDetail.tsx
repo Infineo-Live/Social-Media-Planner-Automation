@@ -36,6 +36,7 @@ export const ContentDetail: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isSavingDate, setIsSavingDate] = useState<boolean>(false);
+  const [isSavingSubSeries, setIsSavingSubSeries] = useState<boolean>(false);
   const [rejectionReason, setRejectionReason] = useState<string>('');
   const [showRejectModal, setShowRejectModal] = useState<boolean>(false);
   const [canvaInput, setCanvaInput] = useState<string>('');
@@ -480,16 +481,29 @@ export const ContentDetail: React.FC = () => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Sub-Series:</span>{' '}
+                {isSavingSubSeries && (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+                    <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Saving...
+                  </span>
+                )}
                 <select
                   value={item.subSeriesId ?? ''}
+                  disabled={isSavingSubSeries}
                   onChange={async (e) => {
+                    if (isSavingSubSeries) return;
                     const val = e.target.value ? Number(e.target.value) : undefined;
+                    const prevSubSeries = item.subSeriesId;
+                    setIsSavingSubSeries(true);
+                    setItem((prev) => (prev ? { ...prev, subSeriesId: val } : prev));
                     try {
                       const updated = await dataRepository.updateContentItem(item.contentId, { subSeriesId: val });
                       if (updated) setItem(updated);
-                      showToast('Sub-Series updated successfully!', 'success');
                       await refreshData();
+                      setIsSavingSubSeries(false);
+                      showToast('Sub-Series updated successfully!', 'success');
                     } catch (err: any) {
+                      setItem((prev) => (prev ? { ...prev, subSeriesId: prevSubSeries } : prev));
+                      setIsSavingSubSeries(false);
                       showToast(err.message || 'Failed to update sub-series.', 'error');
                     }
                   }}
@@ -499,8 +513,10 @@ export const ContentDetail: React.FC = () => {
                     backgroundColor: 'var(--bg-main)',
                     border: '1px solid var(--border-color)',
                     borderRadius: '4px',
-                    color: 'var(--text-primary)',
+                    color: isSavingSubSeries ? 'var(--text-muted)' : 'var(--text-primary)',
                     fontSize: '0.85rem',
+                    opacity: isSavingSubSeries ? 0.7 : 1,
+                    cursor: isSavingSubSeries ? 'not-allowed' : 'pointer',
                   }}
                 >
                   <option value="">None (Optional)</option>
