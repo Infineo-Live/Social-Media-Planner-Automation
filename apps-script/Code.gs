@@ -70,34 +70,28 @@ function doPost(e) {
       let rowIndex = -1;
       
       for (let i = 1; i < data.length; i++) {
-        // 1. Try matching by ID column if ID exists in sheet
         const cellIdStr = String(data[i][idColumn] || '').toLowerCase().trim();
         const targetIdStr = String(idToFind || '').toLowerCase().trim();
-        const cellDigits = cellIdStr.replace(/\D/g, '');
-        const targetDigits = targetIdStr.replace(/\D/g, '');
-        if (idToFind && cellIdStr !== "" && (cellIdStr === targetIdStr || (cellDigits && cellDigits === targetDigits))) {
+
+        // 1. Exact string match (e.g. "SER009" === "SER009")
+        if (idToFind && cellIdStr !== "" && cellIdStr === targetIdStr) {
           rowIndex = i + 1;
           break;
         }
-        // 2. Fallback for Users sheet: match by Email (col C/index 2) or Name (col B/index 1)
+
+        // 2. Numeric ID match (e.g. Number("009") === Number("9") -> 9 === 9)
+        const cellNum = Number(cellIdStr.replace(/\D/g, ''));
+        const targetNum = Number(targetIdStr.replace(/\D/g, ''));
+        if (idToFind && !isNaN(cellNum) && !isNaN(targetNum) && cellNum > 0 && cellNum === targetNum) {
+          rowIndex = i + 1;
+          break;
+        }
+
+        // 3. Fallback for Users sheet only: match by Email (col C/index 2)
         if (sheetName === 'Users') {
           const emailInSheet = String(data[i][2] || '').toLowerCase().trim();
           const targetEmail = String(newRow[2] || '').toLowerCase().trim();
-          const nameInSheet = String(data[i][1] || '').toLowerCase().trim();
-          const targetName = String(newRow[1] || '').toLowerCase().trim();
-          
           if (targetEmail && emailInSheet === targetEmail) {
-            rowIndex = i + 1;
-            break;
-          }
-          if (targetName && nameInSheet === targetName) {
-            rowIndex = i + 1;
-            break;
-          }
-        } else if (sheetName === 'Series' || sheetName === 'Sub-Series') {
-          const nameInSheet = String(data[i][1] || '').toLowerCase().trim();
-          const targetName = String(newRow[1] || '').toLowerCase().trim();
-          if (targetName && nameInSheet === targetName) {
             rowIndex = i + 1;
             break;
           }

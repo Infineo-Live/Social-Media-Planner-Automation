@@ -296,13 +296,17 @@ export class DataRepository
 
   async updateSeries(seriesId: number, updates: Partial<Series>): Promise<Series> {
     const updated = await memoryRepository.updateSeries(seriesId, updates);
-    await googleSheetsClient.updateSheetRow('Series', 0, seriesId, GoogleSheetsMapper.seriesToRow(updated));
+    const row = GoogleSheetsMapper.seriesToRow(updated);
+    const formattedId = String(row[0]);
+    await googleSheetsClient.updateSheetRow('Series', 0, formattedId, row);
     return updated;
   }
 
   async updateSubSeries(subSeriesId: number, updates: Partial<SubSeries>): Promise<SubSeries> {
     const updated = await memoryRepository.updateSubSeries(subSeriesId, updates);
-    await googleSheetsClient.updateSheetRow('Sub-Series', 0, subSeriesId, GoogleSheetsMapper.subSeriesToRow(updated));
+    const row = GoogleSheetsMapper.subSeriesToRow(updated);
+    const formattedId = String(row[0]);
+    await googleSheetsClient.updateSheetRow('Sub-Series', 0, formattedId, row);
     return updated;
   }
 }
