@@ -8,7 +8,6 @@ import {
   FolderPlus,
   CheckCircle2,
   Library,
-  Bell,
   Users,
   Settings,
   User,
@@ -73,11 +72,6 @@ export const Sidebar: React.FC = () => {
         <NavLink to={ROUTES.CONTENT_LIBRARY} style={linkStyle}>
           <Library size={18} />
           Content Library
-        </NavLink>
-
-        <NavLink to={ROUTES.NOTIFICATIONS} style={linkStyle}>
-          <Bell size={18} />
-          Notifications
         </NavLink>
 
         {currentUser.role === 'Admin' && (

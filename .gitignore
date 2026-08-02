@@ -24,3 +24,6 @@ pnpm-debug.log*
 *.ntvsopt
 *.njsproj
 *.swp
+
+folder_structure.py
+tree_structure.txt
