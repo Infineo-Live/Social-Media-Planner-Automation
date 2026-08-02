@@ -513,7 +513,7 @@ export const ContentDetail: React.FC = () => {
                 <span style={{ color: 'var(--text-muted)' }}>Planned Upload Date:</span>
                 <input
                   type="date"
-                  value={item.plannedUploadDate || ''}
+                  value={item.plannedUploadDate ? item.plannedUploadDate.split('T')[0] : ''}
                   disabled={isPlannedDateLocked}
                   readOnly={isPlannedDateLocked}
                   onChange={async (e) => {
