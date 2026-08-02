@@ -11,11 +11,124 @@ import { ActivityLogItem } from '../types/activity';
 import { AppNotification } from '../types/notification';
 import { appConfig, AppConfig } from '../config/appConfig';
 
-// Initial Seed Users (Empty - all data fetched directly from Google Sheets)
-const seedUsers: User[] = [];
+// Initial Seed Users
+const seedUsers: User[] = [
+  {
+    userId: 1,
+    fullName: 'Admin User',
+    email: 'admin@infineo.com',
+    role: 'Admin',
+    active: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    userId: 2,
+    fullName: 'Manager User',
+    email: 'manager@infineo.com',
+    role: 'Manager',
+    active: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    userId: 3,
+    fullName: 'Rahul Sharma',
+    email: 'rahul@infineo.com',
+    role: 'Employee',
+    active: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    userId: 4,
+    fullName: 'Priya Patel',
+    email: 'priya@infineo.com',
+    role: 'Employee',
+    active: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
-// Initial Seed Content Items (Empty - all data fetched directly from Google Sheets)
-const seedContent: ContentItem[] = [];
+// Initial Seed Content Items
+const seedContent: ContentItem[] = [
+  {
+    contentId: 101,
+    seriesId: 1,
+    subSeriesId: 5,
+    workingTitle: 'Controlling Anger through Mindfulness',
+    realLifeProblem: 'Young professionals struggle with stress and sudden outbursts at work.',
+    mythologyStory: 'Lord Rama calmness during exile announcement.',
+    episodeNumber: 1,
+    currentStatus: 'Idea Review (Manager)',
+    assignedUserId: 2,
+    createdByUserId: 3,
+    currentCanvaLink: '',
+    metadata: {
+      youtubeTitle: '',
+      youtubeDescription: '',
+      youtubeTags: '',
+      instagramCaption: '',
+      instagramPoll: '',
+      linkedInCaption: '',
+      twitterCaption: '',
+    },
+    scheduled: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    uploaded: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+  },
+  {
+    contentId: 102,
+    seriesId: 2,
+    subSeriesId: 1,
+    workingTitle: 'Janmashtami Special: Significance of Butter',
+    realLifeProblem: 'Why is butter associated with Krishna and what is the health symbolism?',
+    mythologyStory: 'Makhanchor stories from Vrindavan.',
+    episodeNumber: undefined,
+    currentStatus: 'Script WIP',
+    assignedUserId: 3,
+    createdByUserId: 4,
+    currentCanvaLink: '',
+    metadata: {
+      youtubeTitle: '',
+      youtubeDescription: '',
+      youtubeTags: '',
+      instagramCaption: '',
+      instagramPoll: '',
+      linkedInCaption: '',
+      twitterCaption: '',
+    },
+    scheduled: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    uploaded: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    contentId: 103,
+    seriesId: 3,
+    workingTitle: 'Office Work vs Weekend Expectations',
+    realLifeProblem: 'Relatable humor around Friday evening deadlines.',
+    currentStatus: 'Reel WIP',
+    assignedUserId: 4,
+    createdByUserId: 4,
+    currentCanvaLink: 'https://canva.com/design/example103',
+    metadata: {
+      youtubeTitle: '',
+      youtubeDescription: '',
+      youtubeTags: '',
+      instagramCaption: '',
+      instagramPoll: '',
+      linkedInCaption: '',
+      twitterCaption: '',
+    },
+    scheduled: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    uploaded: { YouTube: false, Instagram: false, LinkedIn: false, Twitter: false },
+    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+  },
+];
 
 class MemoryRepository
   implements
