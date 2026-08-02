@@ -17,6 +17,10 @@ export const SettingsPage: React.FC = () => {
 
   const [isAddingSeries, setIsAddingSeries] = useState(false);
   const [isAddingSubSeries, setIsAddingSubSeries] = useState(false);
+  const [isSavingSeries, setIsSavingSeries] = useState(false);
+  const [isTogglingSeriesId, setIsTogglingSeriesId] = useState<number | null>(null);
+  const [isSavingSubSeries, setIsSavingSubSeries] = useState(false);
+  const [isTogglingSubSeriesId, setIsTogglingSubSeriesId] = useState<number | null>(null);
 
   const [editingSeriesId, setEditingSeriesId] = useState<number | null>(null);
   const [editSeriesName, setEditSeriesName] = useState('');
@@ -57,25 +61,45 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleToggleSeriesActive = async (series: Series) => {
+    if (isTogglingSeriesId !== null) return;
+    setIsTogglingSeriesId(series.seriesId);
     try {
       await dataRepository.updateSeries(series.seriesId, { active: !series.active });
+      try {
+        await refreshData();
+      } catch {
+        setIsTogglingSeriesId(null);
+        showToast('Series updated, but failed to refresh list.', 'error');
+        return;
+      }
+      setIsTogglingSeriesId(null);
       showToast(`Series '${series.name}' ${!series.active ? 'enabled' : 'disabled'}.`, 'success');
-      await refreshData();
     } catch (err: any) {
+      setIsTogglingSeriesId(null);
       showToast(err.message || 'Failed to update series.', 'error');
     }
   };
 
   const handleSaveSeriesEdit = async (seriesId: number) => {
+    if (isSavingSeries) return;
+    setIsSavingSeries(true);
     try {
       await dataRepository.updateSeries(seriesId, {
         name: editSeriesName.trim(),
         shortCode: editSeriesCode.trim().toUpperCase(),
       });
+      try {
+        await refreshData();
+      } catch {
+        setIsSavingSeries(false);
+        showToast('Series updated, but failed to refresh list.', 'error');
+        return;
+      }
+      setIsSavingSeries(false);
       setEditingSeriesId(null);
       showToast('Series updated successfully!', 'success');
-      await refreshData();
     } catch (err: any) {
+      setIsSavingSeries(false);
       showToast(err.message || 'Failed to update series.', 'error');
     }
   };
@@ -108,24 +132,44 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleToggleSubSeriesActive = async (subSeries: SubSeries) => {
+    if (isTogglingSubSeriesId !== null) return;
+    setIsTogglingSubSeriesId(subSeries.subSeriesId);
     try {
       await dataRepository.updateSubSeries(subSeries.subSeriesId, { active: !subSeries.active });
+      try {
+        await refreshData();
+      } catch {
+        setIsTogglingSubSeriesId(null);
+        showToast('Sub-Series updated, but failed to refresh list.', 'error');
+        return;
+      }
+      setIsTogglingSubSeriesId(null);
       showToast(`Sub-Series '${subSeries.name}' ${!subSeries.active ? 'enabled' : 'disabled'}.`, 'success');
-      await refreshData();
     } catch (err: any) {
+      setIsTogglingSubSeriesId(null);
       showToast(err.message || 'Failed to update sub-series.', 'error');
     }
   };
 
   const handleSaveSubSeriesEdit = async (subSeriesId: number) => {
+    if (isSavingSubSeries) return;
+    setIsSavingSubSeries(true);
     try {
       await dataRepository.updateSubSeries(subSeriesId, {
         name: editSubSeriesName.trim(),
       });
+      try {
+        await refreshData();
+      } catch {
+        setIsSavingSubSeries(false);
+        showToast('Sub-Series updated, but failed to refresh list.', 'error');
+        return;
+      }
+      setIsSavingSubSeries(false);
       setEditingSubSeriesId(null);
       showToast('Sub-Series updated successfully!', 'success');
-      await refreshData();
     } catch (err: any) {
+      setIsSavingSubSeries(false);
       showToast(err.message || 'Failed to update sub-series.', 'error');
     }
   };
@@ -218,9 +262,10 @@ export const SettingsPage: React.FC = () => {
                     />
                     <button
                       onClick={() => handleSaveSeriesEdit(s.seriesId)}
-                      style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                      disabled={isSavingSeries}
+                      style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: isSavingSeries ? 'not-allowed' : 'pointer', opacity: isSavingSeries ? 0.7 : 1, fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                     >
-                      Save
+                      {isSavingSeries ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Saving...</> : 'Save'}
                     </button>
                     <button
                       onClick={() => setEditingSeriesId(null)}
@@ -248,16 +293,21 @@ export const SettingsPage: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleToggleSeriesActive(s)}
+                        disabled={isTogglingSeriesId === s.seriesId}
                         style={{
                           background: 'none',
                           border: 'none',
                           color: s.active ? 'var(--danger)' : 'var(--accent-primary)',
-                          cursor: 'pointer',
+                          cursor: isTogglingSeriesId === s.seriesId ? 'not-allowed' : 'pointer',
+                          opacity: isTogglingSeriesId === s.seriesId ? 0.7 : 1,
                           fontSize: '0.75rem',
                           fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
                         }}
                       >
-                        {s.active ? 'Disable' : 'Enable'}
+                        {isTogglingSeriesId === s.seriesId ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Working...</> : (s.active ? 'Disable' : 'Enable')}
                       </button>
                     </div>
                   </>
@@ -328,9 +378,10 @@ export const SettingsPage: React.FC = () => {
                     />
                     <button
                       onClick={() => handleSaveSubSeriesEdit(sub.subSeriesId)}
-                      style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                      disabled={isSavingSubSeries}
+                      style={{ padding: '0.3rem 0.6rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: isSavingSubSeries ? 'not-allowed' : 'pointer', opacity: isSavingSubSeries ? 0.7 : 1, fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                     >
-                      Save
+                      {isSavingSubSeries ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Saving...</> : 'Save'}
                     </button>
                     <button
                       onClick={() => setEditingSubSeriesId(null)}
@@ -354,16 +405,21 @@ export const SettingsPage: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleToggleSubSeriesActive(sub)}
+                        disabled={isTogglingSubSeriesId === sub.subSeriesId}
                         style={{
                           background: 'none',
                           border: 'none',
                           color: sub.active ? 'var(--danger)' : 'var(--accent-primary)',
-                          cursor: 'pointer',
+                          cursor: isTogglingSubSeriesId === sub.subSeriesId ? 'not-allowed' : 'pointer',
+                          opacity: isTogglingSubSeriesId === sub.subSeriesId ? 0.7 : 1,
                           fontSize: '0.75rem',
                           fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
                         }}
                       >
-                        {sub.active ? 'Disable' : 'Enable'}
+                        {isTogglingSubSeriesId === sub.subSeriesId ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Working...</> : (sub.active ? 'Disable' : 'Enable')}
                       </button>
                     </div>
                   </>
