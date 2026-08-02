@@ -13,9 +13,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
-    env: {
-      VITE_ENABLE_MOCK_DATA: 'true',
-    },
     setupFiles: [],
   },
 } as any);
