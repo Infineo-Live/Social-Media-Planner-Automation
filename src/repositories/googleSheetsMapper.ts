@@ -149,31 +149,40 @@ export class GoogleSheetsMapper {
     };
   }
 
-  // Sub-Series Mapper (Master Sub-Series Sheet: [subSeriesId, name, active])
+  // Sub-Series Mapper (Master Sub-Series Sheet: [subSeriesId, name, active, displayOrder])
   static subSeriesToRow(subSeries: SubSeries): (string | number | boolean)[] {
-    return [subSeries.subSeriesId, subSeries.name, subSeries.active];
+    return [
+      subSeries.subSeriesId,
+      subSeries.name,
+      subSeries.active,
+      subSeries.displayOrder !== undefined ? subSeries.displayOrder : '',
+    ];
   }
 
   static rowToSubSeries(row: any[], defaultId: number = 1): SubSeries {
     const parsedId = Number(row[0]);
     const subSeriesId = !isNaN(parsedId) && parsedId > 0 ? parsedId : defaultId;
-    
-    // Support legacy 4-column format [subSeriesId, seriesId, name, active]
-    const isLegacy = row.length >= 4 || typeof row[1] === 'number' || (!isNaN(Number(row[1])) && row[1] !== '' && row[1] !== true && row[1] !== false && String(row[1]).toLowerCase() !== 'true' && String(row[1]).toLowerCase() !== 'false' && row.length > 3);
 
-    if (isLegacy && row[2] !== undefined) {
+    const row2Lower = String(row[2] || '').toLowerCase();
+    const isRow2ActiveBoolean = row[2] === true || row[2] === false || row2Lower === 'true' || row2Lower === 'false';
+
+    if (isRow2ActiveBoolean) {
+      const parsedDisplayOrder = Number(row[3]);
       return {
         subSeriesId,
-        seriesId: Number(row[1]),
-        name: String(row[2] || '').trim(),
-        active: row[3] !== undefined && row[3] !== '' ? (String(row[3]).toLowerCase() === 'true' || row[3] === true) : true,
+        name: String(row[1] || '').trim(),
+        active: row2Lower === 'true' || row[2] === true,
+        displayOrder: !isNaN(parsedDisplayOrder) && row[3] !== '' && row[3] !== undefined && row[3] !== null ? parsedDisplayOrder : undefined,
       };
     }
 
+    // Legacy format fallback: [subSeriesId, seriesId, name, active]
+    const row3Lower = String(row[3] || '').toLowerCase();
     return {
       subSeriesId,
-      name: String(row[1] || '').trim(),
-      active: row[2] !== undefined && row[2] !== '' ? (String(row[2]).toLowerCase() === 'true' || row[2] === true) : true,
+      seriesId: Number(row[1]),
+      name: String(row[2] || '').trim(),
+      active: row[3] !== undefined && row[3] !== '' ? (row3Lower === 'true' || row[3] === true) : true,
     };
   }
 }

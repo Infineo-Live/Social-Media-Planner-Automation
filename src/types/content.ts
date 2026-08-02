@@ -27,6 +27,7 @@ export interface SubSeries {
   seriesId?: number;
   name: string;
   active: boolean;
+  displayOrder?: number;
 }
 
 export interface PlatformChecklist {
