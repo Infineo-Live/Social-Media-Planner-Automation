@@ -192,33 +192,41 @@ export class DataRepository
   }
 
   async getSeries(): Promise<Series[]> {
-    const rows = await googleSheetsClient.fetchSheetData('Series');
-    if (rows) {
-      const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
-      if (validRows.length > 0) {
-        return validRows.map((r, idx) => GoogleSheetsMapper.rowToSeries(r, idx + 1));
+    try {
+      const rows = await googleSheetsClient.fetchSheetData('Series');
+      if (rows) {
+        const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
+        if (validRows.length > 0) {
+          return validRows.map((r, idx) => GoogleSheetsMapper.rowToSeries(r, idx + 1));
+        }
       }
+    } catch {
+      // Fallback to memory repository if sheet does not exist or fetch fails
     }
     return memoryRepository.getSeries();
   }
 
   async getSubSeries(_seriesId?: number): Promise<SubSeries[]> {
-    const rows = await googleSheetsClient.fetchSheetData('Sub-Series');
-    if (rows) {
-      const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
-      if (validRows.length > 0) {
-        const items = validRows.map((r, idx) => GoogleSheetsMapper.rowToSubSeries(r, idx + 1));
-        const uniqueItems: SubSeries[] = [];
-        const seenNames = new Set<string>();
-        for (const item of items) {
-          const lower = item.name.toLowerCase();
-          if (!seenNames.has(lower)) {
-            seenNames.add(lower);
-            uniqueItems.push(item);
+    try {
+      const rows = await googleSheetsClient.fetchSheetData('Sub-Series');
+      if (rows) {
+        const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
+        if (validRows.length > 0) {
+          const items = validRows.map((r, idx) => GoogleSheetsMapper.rowToSubSeries(r, idx + 1));
+          const uniqueItems: SubSeries[] = [];
+          const seenNames = new Set<string>();
+          for (const item of items) {
+            const lower = item.name.toLowerCase();
+            if (!seenNames.has(lower)) {
+              seenNames.add(lower);
+              uniqueItems.push(item);
+            }
           }
+          return uniqueItems;
         }
-        return uniqueItems;
       }
+    } catch {
+      // Fallback to memory repository if sheet does not exist or fetch fails
     }
     return memoryRepository.getSubSeries();
   }
