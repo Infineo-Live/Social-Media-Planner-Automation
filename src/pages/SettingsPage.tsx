@@ -37,14 +37,22 @@ export const SettingsPage: React.FC = () => {
         shortCode: newSeriesCode.trim().toUpperCase(),
         active: true,
       });
+
+      try {
+        await refreshData();
+      } catch (refreshErr: any) {
+        setIsAddingSeries(false);
+        showToast('Series created, but failed to refresh list.', 'error');
+        return;
+      }
+
+      setIsAddingSeries(false);
       setNewSeriesName('');
       setNewSeriesCode('');
       showToast('Series added successfully!', 'success');
-      await refreshData();
     } catch (err: any) {
-      showToast(err.message || 'Failed to add series.', 'error');
-    } finally {
       setIsAddingSeries(false);
+      showToast(err.message || 'Failed to add series.', 'error');
     }
   };
 
@@ -81,13 +89,21 @@ export const SettingsPage: React.FC = () => {
         name: newSubSeriesName.trim(),
         active: true,
       });
+
+      try {
+        await refreshData();
+      } catch (refreshErr: any) {
+        setIsAddingSubSeries(false);
+        showToast('Sub-Series created, but failed to refresh list.', 'error');
+        return;
+      }
+
+      setIsAddingSubSeries(false);
       setNewSubSeriesName('');
       showToast('Sub-Series added successfully!', 'success');
-      await refreshData();
     } catch (err: any) {
-      showToast(err.message || 'Failed to add sub-series.', 'error');
-    } finally {
       setIsAddingSubSeries(false);
+      showToast(err.message || 'Failed to add sub-series.', 'error');
     }
   };
 
