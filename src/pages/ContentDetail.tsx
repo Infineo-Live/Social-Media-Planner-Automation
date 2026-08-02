@@ -534,13 +534,13 @@ export const ContentDetail: React.FC = () => {
                     try {
                       const updated = await dataRepository.updateContentItem(item.contentId, { plannedUploadDate: val });
                       if (updated) setItem(updated);
-                      showToast('Planned upload date updated!', 'success');
                       await refreshData();
+                      setIsSavingDate(false);
+                      showToast('Planned upload date updated!', 'success');
                     } catch (err: any) {
                       setItem((prev) => (prev ? { ...prev, plannedUploadDate: prevDate } : prev));
-                      showToast(err.message || 'Failed to update planned upload date.', 'error');
-                    } finally {
                       setIsSavingDate(false);
+                      showToast(err.message || 'Failed to update planned upload date.', 'error');
                     }
                   }}
                   style={{
