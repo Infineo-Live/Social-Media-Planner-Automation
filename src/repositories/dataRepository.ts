@@ -192,21 +192,30 @@ export class DataRepository
   }
 
   async getSeries(): Promise<Series[]> {
+    const memoryItems = await memoryRepository.getSeries();
     try {
       const rows = await googleSheetsClient.fetchSheetData('Series');
       if (rows) {
         const validRows = rows.filter(r => r.some(cell => cell !== '' && cell !== null && cell !== undefined));
         if (validRows.length > 0) {
-          return validRows.map((r, idx) => GoogleSheetsMapper.rowToSeries(r, idx + 1));
+          const sheetItems = validRows.map((r, idx) => GoogleSheetsMapper.rowToSeries(r, idx + 1));
+          const merged = [...sheetItems];
+          for (const m of memoryItems) {
+            if (!merged.some((s) => s.seriesId === m.seriesId || s.name.toLowerCase() === m.name.toLowerCase())) {
+              merged.push(m);
+            }
+          }
+          return merged;
         }
       }
     } catch {
       // Fallback to memory repository if sheet does not exist or fetch fails
     }
-    return memoryRepository.getSeries();
+    return memoryItems;
   }
 
   async getSubSeries(): Promise<SubSeries[]> {
+    const memoryItems = await memoryRepository.getSubSeries();
     try {
       const rows = await googleSheetsClient.fetchSheetData('Sub-Series');
       if (rows) {
@@ -222,13 +231,20 @@ export class DataRepository
               uniqueItems.push(item);
             }
           }
+          for (const m of memoryItems) {
+            const lower = m.name.toLowerCase();
+            if (!seenNames.has(lower)) {
+              seenNames.add(lower);
+              uniqueItems.push(m);
+            }
+          }
           return uniqueItems;
         }
       }
     } catch {
       // Fallback to memory repository if sheet does not exist or fetch fails
     }
-    return memoryRepository.getSubSeries();
+    return memoryItems;
   }
 
   async addSeries(series: Omit<Series, 'seriesId'>): Promise<Series> {

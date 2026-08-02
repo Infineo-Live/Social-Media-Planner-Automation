@@ -4,7 +4,7 @@ import { useApp } from '../context/appContext';
 import { useToast } from '../context/ToastContext';
 import { dataRepository } from '../repositories/dataRepository';
 import { Series, SubSeries } from '../types/content';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const { currentUser } = useAuth();
@@ -14,6 +14,9 @@ export const SettingsPage: React.FC = () => {
   const [newSeriesName, setNewSeriesName] = useState('');
   const [newSeriesCode, setNewSeriesCode] = useState('');
   const [newSubSeriesName, setNewSubSeriesName] = useState('');
+
+  const [isAddingSeries, setIsAddingSeries] = useState(false);
+  const [isAddingSubSeries, setIsAddingSubSeries] = useState(false);
 
   const [editingSeriesId, setEditingSeriesId] = useState<number | null>(null);
   const [editSeriesName, setEditSeriesName] = useState('');
@@ -26,6 +29,8 @@ export const SettingsPage: React.FC = () => {
 
   const handleAddSeries = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAddingSeries) return;
+    setIsAddingSeries(true);
     try {
       await dataRepository.addSeries({
         name: newSeriesName.trim(),
@@ -38,6 +43,8 @@ export const SettingsPage: React.FC = () => {
       await refreshData();
     } catch (err: any) {
       showToast(err.message || 'Failed to add series.', 'error');
+    } finally {
+      setIsAddingSeries(false);
     }
   };
 
@@ -67,6 +74,8 @@ export const SettingsPage: React.FC = () => {
 
   const handleAddSubSeries = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAddingSubSeries) return;
+    setIsAddingSubSeries(true);
     try {
       await dataRepository.addSubSeries({
         name: newSubSeriesName.trim(),
@@ -77,6 +86,8 @@ export const SettingsPage: React.FC = () => {
       await refreshData();
     } catch (err: any) {
       showToast(err.message || 'Failed to add sub-series.', 'error');
+    } finally {
+      setIsAddingSubSeries(false);
     }
   };
 
@@ -125,6 +136,7 @@ export const SettingsPage: React.FC = () => {
             <input
               type="text"
               required
+              disabled={isAddingSeries}
               placeholder="Series Name (e.g. Neo Ki Paathshala)"
               value={newSeriesName}
               onChange={(e) => setNewSeriesName(e.target.value)}
@@ -133,6 +145,7 @@ export const SettingsPage: React.FC = () => {
             <input
               type="text"
               required
+              disabled={isAddingSeries}
               placeholder="Short Code (e.g. NKPS)"
               value={newSeriesCode}
               onChange={(e) => setNewSeriesCode(e.target.value)}
@@ -140,10 +153,33 @@ export const SettingsPage: React.FC = () => {
             />
             <button
               type="submit"
-              style={{ padding: '0.6rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              disabled={isAddingSeries}
+              style={{
+                padding: '0.6rem',
+                backgroundColor: 'var(--accent-primary)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: 600,
+                cursor: isAddingSeries ? 'not-allowed' : 'pointer',
+                opacity: isAddingSeries ? 0.7 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+              }}
             >
-              <Plus size={16} />
-              Add New Series
+              {isAddingSeries ? (
+                <>
+                  <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                  Adding Series...
+                </>
+              ) : (
+                <>
+                  <Plus size={16} />
+                  Add New Series
+                </>
+              )}
             </button>
           </form>
 
@@ -225,6 +261,7 @@ export const SettingsPage: React.FC = () => {
             <input
               type="text"
               required
+              disabled={isAddingSubSeries}
               placeholder="Sub-Series Name (e.g. Janmashtami)"
               value={newSubSeriesName}
               onChange={(e) => setNewSubSeriesName(e.target.value)}
@@ -232,10 +269,33 @@ export const SettingsPage: React.FC = () => {
             />
             <button
               type="submit"
-              style={{ padding: '0.6rem', backgroundColor: 'var(--accent-primary)', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              disabled={isAddingSubSeries}
+              style={{
+                padding: '0.6rem',
+                backgroundColor: 'var(--accent-primary)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: 600,
+                cursor: isAddingSubSeries ? 'not-allowed' : 'pointer',
+                opacity: isAddingSubSeries ? 0.7 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+              }}
             >
-              <Plus size={16} />
-              Add Sub-Series / Festival
+              {isAddingSubSeries ? (
+                <>
+                  <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                  Adding Sub-Series...
+                </>
+              ) : (
+                <>
+                  <Plus size={16} />
+                  Add Sub-Series / Festival
+                </>
+              )}
             </button>
           </form>
 
