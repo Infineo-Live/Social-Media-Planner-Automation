@@ -7,16 +7,22 @@ import { EmptyState } from '../components/EmptyState';
 import { Filter, Plus, Eye } from 'lucide-react';
 
 export const ContentLibrary: React.FC = () => {
-  const { contentItems, seriesList } = useApp();
+  const { contentItems, seriesList, subSeriesList } = useApp();
   const navigate = useNavigate();
 
   const [selectedSeries, setSelectedSeries] = useState<number | 'all'>('all');
+  const [selectedSubSeries, setSelectedSubSeries] = useState<number | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<string | 'all'>('all');
+
+  const visibleSubSeries = selectedSeries === 'all'
+    ? subSeriesList
+    : subSeriesList.filter((ss) => ss.seriesId === selectedSeries);
 
   const filteredItems = contentItems.filter((item) => {
     const matchesSeries = selectedSeries === 'all' || item.seriesId === Number(selectedSeries);
+    const matchesSubSeries = selectedSubSeries === 'all' || item.subSeriesId === Number(selectedSubSeries);
     const matchesStatus = selectedStatus === 'all' || item.currentStatus === selectedStatus;
-    return matchesSeries && matchesStatus;
+    return matchesSeries && matchesSubSeries && matchesStatus;
   });
 
   return (
@@ -67,7 +73,10 @@ export const ContentLibrary: React.FC = () => {
           <Filter size={16} style={{ color: 'var(--text-muted)' }} />
           <select
             value={selectedSeries}
-            onChange={(e) => setSelectedSeries(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            onChange={(e) => {
+              setSelectedSeries(e.target.value === 'all' ? 'all' : Number(e.target.value));
+              setSelectedSubSeries('all');
+            }}
             style={{
               padding: '0.6rem 0.75rem',
               backgroundColor: 'var(--bg-main)',
@@ -81,6 +90,26 @@ export const ContentLibrary: React.FC = () => {
             {seriesList.map((s) => (
               <option key={s.seriesId} value={s.seriesId}>
                 [{s.shortCode}] {s.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedSubSeries}
+            onChange={(e) => setSelectedSubSeries(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            style={{
+              padding: '0.6rem 0.75rem',
+              backgroundColor: 'var(--bg-main)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '6px',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+            }}
+          >
+            <option value="all">All Sub-Series</option>
+            {visibleSubSeries.map((ss) => (
+              <option key={ss.subSeriesId} value={ss.subSeriesId}>
+                {ss.name}
               </option>
             ))}
           </select>
