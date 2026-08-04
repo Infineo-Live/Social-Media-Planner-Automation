@@ -30,13 +30,20 @@ export const ContentLibrary: React.FC = () => {
     ? subSeriesList
     : subSeriesList.filter((ss) => ss.seriesId === selectedSeries);
 
-  const filteredItems = contentItems.filter((item) => {
-    const matchesSeries = selectedSeries === 'all' || item.seriesId === Number(selectedSeries);
-    const matchesSubSeries = selectedSubSeries === 'all' || item.subSeriesId === Number(selectedSubSeries);
-    const matchesStatus = selectedStatus === 'all' || item.currentStatus === selectedStatus;
-    const matchesAssignedUser = selectedAssignedUser === 'all' || item.assignedUserId === selectedAssignedUser;
-    return matchesSeries && matchesSubSeries && matchesStatus && matchesAssignedUser;
-  });
+  const filteredItems = contentItems
+    .filter((item) => {
+      const matchesSeries = selectedSeries === 'all' || item.seriesId === Number(selectedSeries);
+      const matchesSubSeries = selectedSubSeries === 'all' || item.subSeriesId === Number(selectedSubSeries);
+      const matchesStatus = selectedStatus === 'all' || item.currentStatus === selectedStatus;
+      const matchesAssignedUser = selectedAssignedUser === 'all' || item.assignedUserId === selectedAssignedUser;
+      return matchesSeries && matchesSubSeries && matchesStatus && matchesAssignedUser;
+    })
+    .sort((a, b) => {
+      const aAssigned = Boolean(a.assignedUserId);
+      const bAssigned = Boolean(b.assignedUserId);
+      if (aAssigned === bAssigned) return 0;
+      return aAssigned ? -1 : 1;
+    });
 
   const isAdmin = currentUser?.role === 'Admin';
 
