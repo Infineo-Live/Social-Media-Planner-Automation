@@ -19,7 +19,6 @@ import { ContentDetail } from './pages/ContentDetail';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { TeamOverview } from './pages/TeamOverview';
 import { UsersManagement } from './pages/UsersManagement';
-import { SettingsPage } from './pages/SettingsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ContentCalendar } from './pages/ContentCalendar';
 
@@ -149,17 +148,6 @@ export function App() {
                 <ProtectedRoute allowedRoles={['Admin']}>
                   <MainLayout>
                     <UsersManagement />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path={ROUTES.SETTINGS}
-              element={
-                <ProtectedRoute allowedRoles={['Admin']}>
-                  <MainLayout>
-                    <SettingsPage />
                   </MainLayout>
                 </ProtectedRoute>
               }

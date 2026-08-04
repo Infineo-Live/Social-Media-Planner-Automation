@@ -10,7 +10,6 @@ import {
   Library,
   CalendarDays,
   Users,
-  Settings,
   User,
 } from 'lucide-react';
 
@@ -88,10 +87,6 @@ export const Sidebar: React.FC = () => {
             <NavLink to={ROUTES.USERS} style={linkStyle}>
               <Users size={18} />
               Users
-            </NavLink>
-            <NavLink to={ROUTES.SETTINGS} style={linkStyle}>
-              <Settings size={18} />
-              Settings
             </NavLink>
           </>
         )}

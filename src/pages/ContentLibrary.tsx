@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../auth/authContext';
 import { useApp } from '../context/appContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES, WORKFLOW_STATUSES } from '../config/constants';
 import { StatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
-import { Filter, Plus, Eye } from 'lucide-react';
+import { SeriesManagement } from '../components/SeriesManagement';
+import { Filter, Plus, Eye, Layers, Settings2 } from 'lucide-react';
 import { dataRepository } from '../repositories/dataRepository';
 import { User } from '../types/user';
 
 export const ContentLibrary: React.FC = () => {
+  const { currentUser } = useAuth();
   const { contentItems, seriesList, subSeriesList } = useApp();
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState<'items' | 'series'>('items');
   const [selectedSeries, setSelectedSeries] = useState<number | 'all'>('all');
   const [selectedSubSeries, setSelectedSubSeries] = useState<number | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<string | 'all'>('all');
@@ -33,6 +37,8 @@ export const ContentLibrary: React.FC = () => {
     const matchesAssignedUser = selectedAssignedUser === 'all' || item.assignedUserId === selectedAssignedUser;
     return matchesSeries && matchesSubSeries && matchesStatus && matchesAssignedUser;
   });
+
+  const isAdmin = currentUser?.role === 'Admin';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -65,171 +71,232 @@ export const ContentLibrary: React.FC = () => {
         </button>
       </div>
 
-      {/* Filter Bar */}
-      <div
-        style={{
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '10px',
-          padding: '1rem',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          alignItems: 'center',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Filter size={16} style={{ color: 'var(--text-muted)' }} />
-          <select
-            value={selectedSeries}
-            onChange={(e) => {
-              setSelectedSeries(e.target.value === 'all' ? 'all' : Number(e.target.value));
-              setSelectedSubSeries('all');
-            }}
-            style={{
-              padding: '0.6rem 0.75rem',
-              backgroundColor: 'var(--bg-main)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-            }}
-          >
-            <option value="all">All Series</option>
-            {seriesList.map((s) => (
-              <option key={s.seriesId} value={s.seriesId}>
-                [{s.shortCode}] {s.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedSubSeries}
-            onChange={(e) => setSelectedSubSeries(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-            style={{
-              padding: '0.6rem 0.75rem',
-              backgroundColor: 'var(--bg-main)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-            }}
-          >
-            <option value="all">All Sub-Series</option>
-            {visibleSubSeries.map((ss) => (
-              <option key={ss.subSeriesId} value={ss.subSeriesId}>
-                {ss.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            style={{
-              padding: '0.6rem 0.75rem',
-              backgroundColor: 'var(--bg-main)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-            }}
-          >
-            <option value="all">All Workflow Statuses</option>
-            {WORKFLOW_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedAssignedUser}
-            onChange={(e) => setSelectedAssignedUser(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-            style={{
-              padding: '0.6rem 0.75rem',
-              backgroundColor: 'var(--bg-main)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-            }}
-          >
-            <option value="all">All Assigned Users</option>
-            {users.map((u) => (
-              <option key={u.userId} value={u.userId}>
-                {u.fullName}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Content Table */}
-      {filteredItems.length === 0 ? (
-        <EmptyState title="No Matching Content Found" message="Try adjusting your search criteria or series filters." />
-      ) : (
+      {/* Admin Tab Switcher */}
+      {isAdmin && (
         <div
           style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '10px',
-            overflow: 'hidden',
+            display: 'flex',
+            gap: '0.5rem',
+            borderBottom: '1px solid var(--border-color)',
+            paddingBottom: '0.5rem',
           }}
         >
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
-                  <th style={{ padding: '0.85rem 1rem' }}>ID</th>
-                  <th style={{ padding: '0.85rem 1rem' }}>Series</th>
-                  <th style={{ padding: '0.85rem 1rem' }}>Working Title / Problem</th>
-                  <th style={{ padding: '0.85rem 1rem' }}>Status</th>
-                  <th style={{ padding: '0.85rem 1rem' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((item) => {
-                  const s = seriesList.find((sr) => sr.seriesId === item.seriesId);
-                  return (
-                    <tr key={item.contentId} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                      <td style={{ padding: '0.85rem 1rem', color: 'var(--text-secondary)' }}>#{item.contentId}</td>
-                      <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
-                        {s ? s.shortCode : '-'}
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-primary)' }}>
-                        {item.title}
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <StatusBadge status={item.currentStatus} />
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <button
-                          onClick={() => navigate(ROUTES.CONTENT_DETAIL.replace(':id', String(item.contentId)))}
-                          style={{
-                            padding: '0.4rem 0.85rem',
-                            backgroundColor: 'var(--bg-main)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '4px',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.8rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.35rem',
-                          }}
-                        >
-                          <Eye size={14} />
-                          Details
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <button
+            onClick={() => setActiveTab('items')}
+            style={{
+              padding: '0.55rem 1rem',
+              backgroundColor: activeTab === 'items' ? 'var(--accent-primary)' : 'transparent',
+              color: activeTab === 'items' ? '#ffffff' : 'var(--text-secondary)',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <Layers size={16} />
+            Content Items
+          </button>
+
+          <button
+            onClick={() => setActiveTab('series')}
+            style={{
+              padding: '0.55rem 1rem',
+              backgroundColor: activeTab === 'series' ? 'var(--accent-primary)' : 'transparent',
+              color: activeTab === 'series' ? '#ffffff' : 'var(--text-secondary)',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <Settings2 size={16} />
+            Series & Sub-Series Management
+          </button>
         </div>
+      )}
+
+      {/* Main View Area */}
+      {isAdmin && activeTab === 'series' ? (
+        <SeriesManagement />
+      ) : (
+        <>
+          {/* Filter Bar */}
+          <div
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '10px',
+              padding: '1rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Filter size={16} style={{ color: 'var(--text-muted)' }} />
+              <select
+                value={selectedSeries}
+                onChange={(e) => {
+                  setSelectedSeries(e.target.value === 'all' ? 'all' : Number(e.target.value));
+                  setSelectedSubSeries('all');
+                }}
+                style={{
+                  padding: '0.6rem 0.75rem',
+                  backgroundColor: 'var(--bg-main)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <option value="all">All Series</option>
+                {seriesList.map((s) => (
+                  <option key={s.seriesId} value={s.seriesId}>
+                    [{s.shortCode}] {s.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={selectedSubSeries}
+                onChange={(e) => setSelectedSubSeries(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                style={{
+                  padding: '0.6rem 0.75rem',
+                  backgroundColor: 'var(--bg-main)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <option value="all">All Sub-Series</option>
+                {visibleSubSeries.map((ss) => (
+                  <option key={ss.subSeriesId} value={ss.subSeriesId}>
+                    {ss.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                style={{
+                  padding: '0.6rem 0.75rem',
+                  backgroundColor: 'var(--bg-main)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <option value="all">All Workflow Statuses</option>
+                {WORKFLOW_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={selectedAssignedUser}
+                onChange={(e) => setSelectedAssignedUser(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                style={{
+                  padding: '0.6rem 0.75rem',
+                  backgroundColor: 'var(--bg-main)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <option value="all">All Assigned Users</option>
+                {users.map((u) => (
+                  <option key={u.userId} value={u.userId}>
+                    {u.fullName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Content Table */}
+          {filteredItems.length === 0 ? (
+            <EmptyState title="No Matching Content Found" message="Try adjusting your search criteria or series filters." />
+          ) : (
+            <div
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '10px',
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
+                      <th style={{ padding: '0.85rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.85rem 1rem' }}>Series</th>
+                      <th style={{ padding: '0.85rem 1rem' }}>Working Title / Problem</th>
+                      <th style={{ padding: '0.85rem 1rem' }}>Status</th>
+                      <th style={{ padding: '0.85rem 1rem' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((item) => {
+                      const s = seriesList.find((sr) => sr.seriesId === item.seriesId);
+                      return (
+                        <tr key={item.contentId} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td style={{ padding: '0.85rem 1rem', color: 'var(--text-secondary)' }}>#{item.contentId}</td>
+                          <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
+                            {s ? s.shortCode : '-'}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                            {item.title}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <StatusBadge status={item.currentStatus} />
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <button
+                              onClick={() => navigate(ROUTES.CONTENT_DETAIL.replace(':id', String(item.contentId)))}
+                              style={{
+                                padding: '0.4rem 0.85rem',
+                                backgroundColor: 'var(--bg-main)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '4px',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                              }}
+                            >
+                              <Eye size={14} />
+                              Details
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

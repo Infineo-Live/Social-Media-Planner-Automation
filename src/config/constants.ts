@@ -34,6 +34,5 @@ export const ROUTES = {
   NOTIFICATIONS: '/notifications',
   TEAM_OVERVIEW: '/team',
   USERS: '/users',
-  SETTINGS: '/settings',
   PROFILE: '/profile',
 };
