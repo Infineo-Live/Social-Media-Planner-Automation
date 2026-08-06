@@ -5,6 +5,7 @@ import { PermissionService } from '../auth/permissionService';
 import { WorkflowError, ValidationError, PermissionError } from './errorFramework';
 import { isValidUrl, isNonEmptyString } from '../utils/validationUtils';
 import { logger } from './logger';
+import { NotificationService } from './notificationService';
 
 export class WorkflowEngine {
   // Helper to find a default Manager or Admin user for automatic routing
@@ -701,14 +702,21 @@ export class WorkflowEngine {
     const item = await dataRepository.getContentItemById(contentId);
     if (!item) throw new ValidationError(`Content Item #${contentId} not found.`);
 
-    const targetUser = await dataRepository.getUserById(targetUserId);
-    if (!targetUser || !targetUser.active) {
-      throw new ValidationError('Target user does not exist or is inactive.');
+    let targetUser: User | undefined;
+    if (targetUserId && targetUserId > 0) {
+      targetUser = await dataRepository.getUserById(targetUserId);
+      if (!targetUser || !targetUser.active) {
+        throw new ValidationError('Target user does not exist or is inactive.');
+      }
     }
 
     const updated = await dataRepository.updateContentItem(contentId, {
-      assignedUserId: targetUserId,
+      assignedUserId: targetUserId && targetUserId > 0 ? targetUserId : undefined,
     });
+
+    const notes = targetUser
+      ? `Reassigned to ${targetUser.fullName} by ${user.fullName}`
+      : `Unassigned by ${user.fullName}`;
 
     await dataRepository.logActivity({
       contentId,
@@ -716,9 +724,25 @@ export class WorkflowEngine {
       actionType: 'Task Reassigned',
       previousStatus: item.currentStatus,
       newStatus: item.currentStatus,
-      notes: `Reassigned to ${targetUser.fullName} by ${user.fullName}`,
+      notes,
     });
+
+    if (targetUser && targetUserId > 0) {
+      try {
+        await NotificationService.createNotification(
+          targetUserId,
+          contentId,
+          'Task Assigned',
+          `You have been assigned task #${contentId} by ${user.fullName}.`
+        );
+        const emailMsg = NotificationService.generateEmailTemplate('TASK_ASSIGNED', targetUser, updated, user);
+        await NotificationService.sendEmailNotification(emailMsg);
+      } catch (err) {
+        logger.error('Failed to dispatch assignment notification', { error: err });
+      }
+    }
 
     return updated;
   }
 }
+

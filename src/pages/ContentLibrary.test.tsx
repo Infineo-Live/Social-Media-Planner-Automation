@@ -83,4 +83,16 @@ describe('ContentLibrary sorting', () => {
     expect(rows[2].textContent).toContain('Unassigned Content 1');
     expect(rows[3].textContent).toContain('Unassigned Content 2');
   });
+
+  it('renders assignment select elements for privileged users (Manager/Admin)', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <ContentLibrary />
+      </MemoryRouter>
+    );
+
+    const selects = container.querySelectorAll('tbody select');
+    expect(selects.length).toBe(4);
+  });
 });
+

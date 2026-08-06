@@ -9,10 +9,12 @@ import { SeriesManagement } from '../components/SeriesManagement';
 import { Filter, Plus, Eye, Layers, Settings2 } from 'lucide-react';
 import { dataRepository } from '../repositories/dataRepository';
 import { User } from '../types/user';
+import { PermissionService } from '../auth/permissionService';
+import { WorkflowEngine } from '../services/workflowEngine';
 
 export const ContentLibrary: React.FC = () => {
   const { currentUser } = useAuth();
-  const { contentItems, seriesList, subSeriesList } = useApp();
+  const { contentItems, seriesList, subSeriesList, refreshData } = useApp();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'items' | 'series'>('items');
@@ -46,6 +48,18 @@ export const ContentLibrary: React.FC = () => {
     });
 
   const isAdmin = currentUser?.role === 'Admin';
+  const canAssign = PermissionService.canAssign(currentUser);
+
+  const handleAssignChange = async (contentId: number, targetUserIdStr: string) => {
+    if (!currentUser) return;
+    const targetUserId = targetUserIdStr ? Number(targetUserIdStr) : 0;
+    try {
+      await WorkflowEngine.manualAssign(currentUser, contentId, targetUserId);
+      await refreshData();
+    } catch (err) {
+      console.error('Failed to assign content item:', err);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -257,12 +271,14 @@ export const ContentLibrary: React.FC = () => {
                       <th style={{ padding: '0.85rem 1rem' }}>Series</th>
                       <th style={{ padding: '0.85rem 1rem' }}>Working Title / Problem</th>
                       <th style={{ padding: '0.85rem 1rem' }}>Status</th>
+                      <th style={{ padding: '0.85rem 1rem' }}>Assigned To</th>
                       <th style={{ padding: '0.85rem 1rem' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredItems.map((item) => {
                       const s = seriesList.find((sr) => sr.seriesId === item.seriesId);
+                      const assignedUser = users.find((u) => u.userId === item.assignedUserId);
                       return (
                         <tr key={item.contentId} style={{ borderBottom: '1px solid var(--border-color)' }}>
                           <td style={{ padding: '0.85rem 1rem', color: 'var(--text-secondary)' }}>#{item.contentId}</td>
@@ -274,6 +290,34 @@ export const ContentLibrary: React.FC = () => {
                           </td>
                           <td style={{ padding: '0.85rem 1rem' }}>
                             <StatusBadge status={item.currentStatus} />
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            {canAssign ? (
+                              <select
+                                aria-label={`Assign Content #${item.contentId}`}
+                                value={item.assignedUserId || ''}
+                                onChange={(e) => handleAssignChange(item.contentId, e.target.value)}
+                                style={{
+                                  padding: '0.4rem 0.6rem',
+                                  backgroundColor: 'var(--bg-main)',
+                                  border: '1px solid var(--border-color)',
+                                  borderRadius: '4px',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.8rem',
+                                }}
+                              >
+                                <option value="">Unassigned</option>
+                                {users.map((u) => (
+                                  <option key={u.userId} value={u.userId}>
+                                    {u.fullName}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span style={{ color: assignedUser ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                                {assignedUser ? assignedUser.fullName : 'Unassigned'}
+                              </span>
+                            )}
                           </td>
                           <td style={{ padding: '0.85rem 1rem' }}>
                             <button
@@ -299,6 +343,7 @@ export const ContentLibrary: React.FC = () => {
                       );
                     })}
                   </tbody>
+
                 </table>
               </div>
             </div>
